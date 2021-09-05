@@ -18,27 +18,17 @@ const firebaseApp = initializeApp(firebaseConfig);
 // Get a reference to the storage service, which is used to create references in your storage bucket
 const storage = getStorage(firebaseApp);
 
-const getAudioFile = (id) => getDownloadURL(ref(storage, `${id}`))
+const getAudioFile = (id, parent) => getDownloadURL(ref(storage, `${id}.wav`))
     .then((url) => {
-      // `url` is the download URL for 'images/stars.jpg'
-
-      // This can be downloaded directly:
-      const xhr = new XMLHttpRequest();
-      xhr.responseType = 'blob';
-      xhr.onload = (event) => {
-        const blob = xhr.response;
-      };
-      xhr.open('GET', url);
-      xhr.send();
-
-      // Or inserted into an <img> element
-      const audio = document.getElementById('player-audio');
-      audio.setAttribute('src', url);
-
-      console.info(`Sat url ${url}`)
+      // Or inserted into an <img> element;
+      console.log(`Sat url ${url}`)
+      parent.innerHTML = `
+        <audio id="player-audio" autoplay loop controls>
+          <source type="audio/wav" src="${url}"/>
+        </audio>
+      `
     })
     .catch((error) => {
-      // Handle any errors
       console.error(error)
     })
 

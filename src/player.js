@@ -22,7 +22,7 @@ const {getAudioFile} = require("./firebase");
       parent.innerHTML = content
     }
 
-    getAudioFile(ref)
+    return getAudioFile(ref, parent)
 
   })
 })();
