@@ -1,4 +1,4 @@
-document.addEventListener('ready', () => {
+(function() {
   console.log('TEST SUCCESS')
 
   fetch('./index.html').then(res => {
@@ -7,4 +7,4 @@ document.addEventListener('ready', () => {
   }).then(content => {
     document.getElementById("body").append(content)
   })
-})
+})()
