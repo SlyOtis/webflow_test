@@ -3,6 +3,7 @@
     console.log('Fetch success')
     return res.text()
   }).then(content => {
-    document.querySelector(".player").append(content)
+    console.log(document.querySelector(".player"))
+    //append(content)
   })
 })()
