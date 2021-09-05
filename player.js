@@ -1,4 +1,4 @@
-const {getAudioFile} = require("./firebase");
+const {getAudioFile} = require("./dist/firebase");
 
 (function () {
 
