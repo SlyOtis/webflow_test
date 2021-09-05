@@ -1,4 +1,10 @@
 (function () {
+
+  function getRef() {
+    return document.querySelector(".player")
+        .parentElement.querySelector('#ref-value').innerHTML
+  }
+
   fetch('https://herro-420.web.app/player.html', {
     mode: 'no-cors',
     method: 'get'
@@ -6,8 +12,8 @@
     console.log('Fetch success')
     return res.text()
   }).then(content => {
-    console.log(window.location.hash)
-    const parent = document.querySelector(".player")
+    console.log(getRef())
+    const parent = document.querySelector('.player')
     if (parent) {
       parent.innerHTML = content
     }
