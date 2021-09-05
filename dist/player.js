@@ -1,4 +1,4 @@
-import {getAudioFile} from "./firebase";
+const {getAudioFile} = require("./firebase");
 
 (function () {
 

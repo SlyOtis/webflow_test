@@ -1,5 +1,5 @@
-import { initializeApp } from "firebase/app";
-import { getStorage, getDownloadURL, ref } from "firebase/storage";
+const { initializeApp } = require("firebase/app");
+const { getStorage, getDownloadURL, ref } = require("firebase/storage");
 
 const firebaseConfig = {
 
