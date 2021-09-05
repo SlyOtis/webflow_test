@@ -1,5 +1,5 @@
 (function () {
-  fetch('https://cdn.jsdelivr.net/gh/SlyOtis/webflow_test@1.0.1/dist/index.html').then(res => {
+  fetch('https://cdn.jsdelivr.net/gh/SlyOtis/webflow_test/dist/index.html').then(res => {
     console.log('Fetch success')
     return res.text()
   }).then(content => {
