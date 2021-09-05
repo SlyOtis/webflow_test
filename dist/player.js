@@ -1,3 +1,5 @@
+import {getAudioFile} from "./firebase";
+
 (function () {
 
   function getRef() {
@@ -12,10 +14,15 @@
     console.log('Fetch success')
     return res.text()
   }).then(content => {
-    console.log(getRef())
+    const ref = getRef()
+    console.log(ref)
+
     const parent = document.querySelector('.player')
     if (parent) {
       parent.innerHTML = content
     }
+
+    getAudioFile(ref)
+
   })
 })();
