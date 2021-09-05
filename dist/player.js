@@ -1,6 +1,6 @@
 (function () {
   fetch('https://herro-420.web.app/player.html', {
-    mode: 'cors',
+    mode: 'no-cors',
     method: 'get'
   }).then(res => {
     console.log('Fetch success')
