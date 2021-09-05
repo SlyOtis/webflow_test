@@ -5,9 +5,7 @@
   }).then(content => {
     const parent = document.querySelector(".player")
     if (parent) {
-      parent.append(content)
+      parent.innerHTML = content
     }
-    console.log(content)
-    //append(content)
   })
 })();
