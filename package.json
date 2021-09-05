@@ -1,16 +1,21 @@
 {
   "name": "webflow_test",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/player.js",
   "repository": "https://github.com/SlyOtis/webflow_test.git",
   "author": "Martin Ottersland <Ottini93@gmail.com>",
   "license": "MIT",
   "private": true,
-  "type": "module",
   "scripts": {
-    "bdp": "firebase deploy"
+    "build": "webpack --config webpack.config.js",
+    "bdp": "yarn build && yarn deploy",
+    "deploy": "firebase deploy"
   },
   "dependencies": {
     "firebase": "9.0.1"
+  },
+  "devDependencies": {
+    "webpack": "^5.52.0",
+    "webpack-cli": "^4.8.0"
   }
 }
