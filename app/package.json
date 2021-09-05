@@ -1,0 +1,11 @@
+{
+  "name": "generator",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc && cp app.js",
+    "run": ""
+  },
+  "devDependencies": {
+    "typescript": "^4.4.2"
+  }
+}
