@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "postinstall": "cd functions && yarn",
+    "postinstall": "cd upload && yarn",
     "build": "webpack --config webpack.config.js",
     "bdp": "yarn build && yarn deploy",
     "deploy": "firebase deploy"

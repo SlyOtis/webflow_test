@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 4200 --cors",
     "build": "vite build",
     "serve": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json"
