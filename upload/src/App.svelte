@@ -1,7 +1,9 @@
 <script lang="ts">
   import FileUpload from "./components/FileUpload.svelte";
   import type {InputFile} from "./lib/utils";
-  import WaveformData from 'waveform-data'
+  import WaveformData from 'waveform-data/dist/waveform-data'
+  import Background from "./components/Background.svelte";
+  import LogoHerro from "./components/LogoHerro.svelte";
 
   let files: Array<InputFile>
 
@@ -25,18 +27,20 @@
           }
         });
       });
-    }).then(res => {
+    }).then((res: WaveformData) => {
       console.log(res)
     })
   }
 
-  function onInput(e) {
-    console.log(e.detail)
+  function onInput({detail}: {detail: InputFile}) {
+    generateWave(detail)
   }
 
 </script>
 
 <main>
+  <LogoHerro />
+  <Background />
   <FileUpload
       on:input={onInput}
       bind:files={files}
@@ -55,6 +59,7 @@
     align-items: center;
     flex-direction: column;
     padding: 16px 32px;
-    background: url("https://uploads-ssl.webflow.com/5fc59358e61c89d18bd0968f/60ae6f3c22d33caef11cdd10_wallpaperflare.com_wallpaper-8.jpg");
+    background-color: #EEEEEE;
+    overflow: hidden;
   }
 </style>
