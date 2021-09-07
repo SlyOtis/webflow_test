@@ -2,9 +2,10 @@
   import {getNextImageCached} from '../lib/reddit'
   import {onMount} from 'svelte'
   import {fade} from 'svelte/transition'
-  import compareAsc from 'date-fns/compareDesc'
+  import compareDesc from 'date-fns/compareDesc'
 
   export let changeDelay = 20
+  export let maxBackStack = 20
   export let autoChange = true
   export let overlay = true
 
@@ -16,7 +17,11 @@
 
   let images: Array<BackgroundImage> = []
 
-  $: ready = images.filter(val => val.loaded).sort(compareAsc).slice(0, 2)
+  $: ready = images.filter(val => val.loaded).sort((a, b) => compareDesc(a.createdAt, b.createdAt)).slice(0, 2)
+
+  function notifyImagesChanged() {
+    images = images
+  }
 
   const delayed = (callback: () => any) => new Promise(resolve => setTimeout(() => {
     resolve(callback())
@@ -36,7 +41,7 @@
         }
 
         images.push(image)
-        images = images
+        notifyImagesChanged()
 
         await fetch(image.url, {
           method: 'GET',
@@ -52,7 +57,7 @@
           }
         })
 
-        images = images
+        notifyImagesChanged()
       }
 
       if (autoChange) {
@@ -84,12 +89,12 @@
 			></div>
 		{/if}
 		<div class="filter">
-			{#each images as image, i }
+			{#each ready as {url}, i (url)}
 				<div
 						transition:fade
 						class="background"
 						style={`
-		        background-image: url("${image.url}");
+		        background-image: url("${url}");
 		        z-index: ${i};
 		        filter: blur(4px);
 	       `}

@@ -12,7 +12,6 @@
   export let files: Array<InputFile> = []
 
   function onInput(e) {
-
     for (let i = 0; i < input.files.length; i++) {
       const file = input.files.item(i) as File
 

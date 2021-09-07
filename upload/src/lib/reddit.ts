@@ -55,7 +55,7 @@ interface RedditPreviewConfig extends RedditConfig {
   sourceOnly: boolean
   resolutionMin?: ImageResolution
   resolutionMax?: ImageResolution
-  prefferedSize?: 'smallest' | 'largest' | 'middle'
+  preferredSize?: 'smallest' | 'largest' | 'middle'
 }
 
 interface RedditConfig {
@@ -304,15 +304,17 @@ function getCachedImage(): RedditImage | null {
         key: keys[index],
         index
       }
+
+      setCachedState(cache)
+      return getCachedImage()
     }
 
+    const image = images[cursor.start]
     cursor.start++
-
     cache.cursors[key] = cursor
-
     setCachedState(cache)
 
-    return images[cursor.start]
+    return image
   }
 
   return null
