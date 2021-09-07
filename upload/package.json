@@ -6,7 +6,8 @@
     "dev": "vite --port 4200 --cors",
     "build": "vite build",
     "serve": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json"
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "copy": "copy ./dist ../dist/upload/"
   },
   "dependencies": {
     "date-fns": "^2.23.0",

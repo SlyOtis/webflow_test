@@ -9,6 +9,8 @@
   "scripts": {
     "postinstall": "cd upload && yarn",
     "build": "webpack --config webpack.config.js",
+    "upload:build": "cd upload && yarn build && cd ..",
+    "upload:copy": "cd upload && yarn copy",
     "bdp": "yarn build && yarn deploy",
     "deploy": "firebase deploy"
   },
