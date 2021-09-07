@@ -60,7 +60,7 @@
     align-items: center;
     flex-direction: column;
     padding: 16px 32px;
-    background-color: #EEEEEE;
+    background-color: #212121;
     overflow: hidden;
   }
 </style>

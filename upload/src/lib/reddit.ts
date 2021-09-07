@@ -1,3 +1,5 @@
+import random from 'random'
+
 type RedditImage = {
   url: string
 } & ImageResolution
@@ -5,8 +7,8 @@ type RedditImage = {
 type RedditPreviewImage = {
   id: string
   title: string
-  resolutions: Array<RedditImage>
-  source: RedditImage
+  resolutions?: Array<RedditImage>
+  source?: RedditImage
   url?: string
 }
 
@@ -16,8 +18,9 @@ type RedditPostPreview = {
 }
 
 type RedditPost = {
+  id: string
   title: string
-  post_hint: 'image' | any
+  post_hint?: 'image' | any
   preview?: RedditPostPreview
   url?: string
   url_overridden_by_dest?: string
@@ -29,22 +32,6 @@ export type SubReddit = {
   flair?: string
   sort?: 'hot' | 'new' | 'top' | 'rising'
 }
-
-const defaultSubreddits: Array<SubReddit> = [
-  {
-    name: 'Wallpapers',
-    r: 'wallpapers'
-  },
-  {
-    name: 'EDM',
-    r: 'EDM',
-    flair: 'Photo'
-  },
-  {
-    name: 'Offencive Wallpapers',
-    r: 'Offensive_Wallpapers'
-  }
-]
 
 interface ImageResolution {
   width: number,
@@ -66,6 +53,25 @@ export const defaultConfig: RedditConfig = {
   baseUrl: "https://www.reddit.com",
 }
 
+export type RedditCacheCursor = {
+  start: number
+}
+
+export type RedditCursorIndex = {
+  key: string
+  index: number
+}
+
+export type RedditCache = {
+  currentCursor?: RedditCursorIndex
+  cursors: {
+    [key: string]: RedditCacheCursor
+  },
+  images: {
+    [key: string]: Array<RedditImage>
+  }
+}
+
 
 //
 // class RedditState {
@@ -80,10 +86,6 @@ export const defaultConfig: RedditConfig = {
 
 const state: RedditConfig | RedditPreviewConfig = defaultConfig
 
-function validResolution() {
-
-}
-
 export function getRedditApiUrl(sub: SubReddit) {
   return `${state.baseUrl}/r/${sub.r}` + (
     sub.sort ? `/${sub.sort}/` : ''
@@ -92,15 +94,27 @@ export function getRedditApiUrl(sub: SubReddit) {
   )
 }
 
+function getValidUrl(post: RedditPost): string | null {
+  const url = post.url || post.url_overridden_by_dest //TODO:: Improve type handling
+  if (
+    url.endsWith('.jpg') ||
+    url.endsWith('.jpeg') ||
+    url.endsWith('.webm') ||
+    url.endsWith('.png')
+  ) {//TODO:: Fix supported formats
+    return url
+  }
+  return null
+}
+
 function extractPreviewImages(prev: Array<RedditPreviewImage>, curr: { data: RedditPost }): Array<RedditPreviewImage> {
   if ('data' in curr) {
     if (curr.data.post_hint === 'image' && 'preview' in curr.data) {
       if (curr.data.preview.enabled && 'images' in curr.data.preview && Array.isArray(curr.data.preview.images)) {
-        if (curr.data.preview.images.length > 0) {
+        if (curr.data.preview.images.length > 0) { //TODO:: fix this ?
           const image = curr.data.preview.images[0]
-
-          if (image)
-
+          const url = getValidUrl(curr.data)
+          if (image && url) {
             return [
               ...prev,
               {
@@ -108,10 +122,23 @@ function extractPreviewImages(prev: Array<RedditPreviewImage>, curr: { data: Red
                 title: curr.data.title,
                 resolutions: image.resolutions,
                 source: image.source,
-                url: curr.data.url ?? curr.data.url_overridden_by_dest
+                url
               }
             ] //TODO:: Determine which one of these to return.
+          }
         }
+      }
+    } else {
+      const url = getValidUrl(curr.data)
+      if (url) {
+        return [
+          ...prev,
+          {
+            id: curr.data.id,
+            title: curr.data.title,
+            url
+          }
+        ]
       }
     }
   }
@@ -156,6 +183,30 @@ function isValidSize(_state: RedditPreviewConfig, img: RedditPreviewImage): bool
 
   return resolutions.length >= 1
 }
+
+const defaultSubreddits: Array<SubReddit> = [
+  {
+    name: 'Wallpapers',
+    r: 'wallpapers',
+    sort: 'hot'
+  },
+  {
+    name: 'EDM',
+    r: 'EDM',
+    flair: 'Photo',
+    sort: 'hot'
+  },
+  {
+    name: 'Offencive Wallpapers',
+    r: 'Offensive_Wallpapers',
+    sort: 'hot'
+  },
+  {
+    name: 'hentaifeet',
+    r: 'hentaifeet',
+    sort: 'hot'
+  }
+]
 
 
 export const getImages = (sub: SubReddit = defaultSubreddits[0]): Promise<Array<RedditPreviewImage>> => fetch(getRedditApiUrl(sub), {
@@ -221,23 +272,6 @@ export const getRandomImage = (sub: SubReddit = defaultSubreddits[0]): Promise<R
     return null
   })
 
-export type RedditCacheCursor = {
-  start: number
-}
-
-export type RedditCache = {
-  currentCursor?: {
-    key: string
-    index: number
-  }
-  cursors: {
-    [key: string]: RedditCacheCursor
-  },
-  images: {
-    [key: string]: Array<RedditImage>
-  }
-}
-
 function getCachedState(): RedditCache | null {
   const cache = localStorage.getItem('reddit_images')
   if (localStorage.getItem('reddit_images')) {
@@ -265,23 +299,57 @@ function updateCachedState(updater: (state: RedditCache) => RedditCache): Reddit
   return setCachedState(next)
 }
 
+function resetCursorIndex(cache: RedditCache): RedditCursorIndex {
+  const keys = Object.keys(cache.cursors)
+  cache.currentCursor = {
+    key: keys[0],
+    index: 0
+  }
 
-function getCachedImage(): RedditImage | null {
+  return cache.currentCursor
+}
+
+function getRandomCachedImage(currentCursor: RedditCursorIndex = null): RedditImage | null {
   const cache = getCachedState()
   if (cache) {
+    let {
+      key,
+      index
+    } = currentCursor || cache.currentCursor || resetCursorIndex(cache)
 
-    if (!cache.currentCursor) {
-      const keys = Object.keys(cache.cursors)
-      cache.currentCursor = {
-        key: keys[0],
-        index: 0
-      }
+    console.log(key, index)
+
+    const images = cache.images[key]
+    const cursor = cache.cursors[key]
+
+    const keys = Object.keys(cache.cursors)
+    index = random.int(0, keys.length - 1)
+
+    cache.cursors[key] = {
+      ...cursor,
+      start: random.int(0, images.length - 1)
     }
+
+    cache.currentCursor = {
+      key: keys[index],
+      index
+    }
+
+    setCachedState(cache)
+    return images[cursor.start]
+  }
+
+  return null
+}
+
+function getNextCachedImage(currentCursor: RedditCursorIndex = null): RedditImage | null {
+  const cache = getCachedState()
+  if (cache) {
 
     let {
       key,
       index
-    } = cache.currentCursor
+    } = currentCursor || cache.currentCursor || resetCursorIndex(cache)
 
     const images = cache.images[key]
     const cursor = cache.cursors[key]
@@ -306,22 +374,47 @@ function getCachedImage(): RedditImage | null {
       }
 
       setCachedState(cache)
-      return getCachedImage()
+      return getNextCachedImage()
     }
 
-    const image = images[cursor.start]
     cursor.start++
     cache.cursors[key] = cursor
     setCachedState(cache)
 
-    return image
+    return images[cursor.start]
   }
 
   return null
 }
 
 export async function getNextImageCached(subs: Array<SubReddit> = defaultSubreddits): Promise<RedditImage | null> {
-  const image = getCachedImage()
+  const image = getNextCachedImage()
+  if (image) {
+    return Promise.resolve(image)
+  }
+
+  for (const sub of subs) {
+    const images = await getRedditImages(sub)
+    updateCachedState(prev => ({
+      ...prev,
+      images: {
+        ...prev.images,
+        [sub.name]: images
+      },
+      cursors: {
+        ...prev.cursors,
+        [sub.name]: {
+          start: 0
+        }
+      }
+    }))
+  }
+
+  return Promise.resolve(image)
+}
+
+export async function getRandomImageCached(subs: Array<SubReddit> = defaultSubreddits): Promise<RedditImage | null> {
+  const image = getRandomCachedImage()
   if (image) {
     return Promise.resolve(image)
   }

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import {getNextImageCached} from '../lib/reddit'
+  import {getRandomImageCached} from '../lib/reddit'
   import {onMount} from 'svelte'
   import {fade} from 'svelte/transition'
   import compareDesc from 'date-fns/compareDesc'
@@ -30,7 +30,7 @@
   async function updateBackground() {
     const index = images.length
     try {
-      const img = await getNextImageCached()
+      const img = await getRandomImageCached()
 
       if (img) {
 
