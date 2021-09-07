@@ -202,8 +202,18 @@ const defaultSubreddits: Array<SubReddit> = [
     sort: 'hot'
   },
   {
-    name: 'hentaifeet',
-    r: 'hentaifeet',
+    name: 'feetandbbc',
+    r: 'feetandbbc',
+    sort: 'hot'
+  },
+  {
+    name: 'Trippy',
+    r: 'trippy',
+    sort: 'hot'
+  },
+  {
+    name: 'DrugArt',
+    r: 'DrugArt',
     sort: 'hot'
   }
 ]
@@ -413,12 +423,7 @@ export async function getNextImageCached(subs: Array<SubReddit> = defaultSubredd
   return Promise.resolve(image)
 }
 
-export async function getRandomImageCached(subs: Array<SubReddit> = defaultSubreddits): Promise<RedditImage | null> {
-  const image = getRandomCachedImage()
-  if (image) {
-    return Promise.resolve(image)
-  }
-
+async function fetchImagesForSubs(subs: Array<SubReddit>){
   for (const sub of subs) {
     const images = await getRedditImages(sub)
     updateCachedState(prev => ({
@@ -435,6 +440,14 @@ export async function getRandomImageCached(subs: Array<SubReddit> = defaultSubre
       }
     }))
   }
+}
 
-  return Promise.resolve(image)
+export async function getRandomImageCached(subs: Array<SubReddit> = defaultSubreddits): Promise<RedditImage | null> {
+  const image = getRandomCachedImage()
+  if (image) {
+    return Promise.resolve(image)
+  }
+
+  await fetchImagesForSubs(subs)
+  return Promise.resolve(getRandomCachedImage())
 }
