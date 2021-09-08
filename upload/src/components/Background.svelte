@@ -16,6 +16,7 @@
   }
 
   let images: Array<BackgroundImage> = []
+  let overlayLoaded = false
 
   $: ready = images.filter(val => val.loaded).sort((a, b) => compareDesc(a.createdAt, b.createdAt)).slice(0, 2)
 
@@ -71,14 +72,18 @@
 
   onMount(() => {
     updateBackground()
+	  if (overlay) {
+	    fetch('./brush.jpg').then(res => overlayLoaded = true)
+	  }
   })
 
 </script>
 
 {#if ready.length > 0}
 	<div class="root" transition:fade>
-		{#if overlay}
+		{#if overlay && overlayLoaded}
 			<div
+					transition:fade
 					class="background"
 					style={`
 		        background-image: url("./brush.jpg");

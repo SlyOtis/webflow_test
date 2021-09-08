@@ -5,6 +5,7 @@
   import {v4 as uuid} from 'uuid'
   import IconBreasts from "../icons/IconBreasts.svelte";
   import IconDownRight from "../icons/IconDownRight.svelte";
+  import {fly} from "svelte/transition";
 
   const dispatch = createEventDispatcher()
 
@@ -53,7 +54,7 @@
 			{:else}
 				<div class="files">
 					{#each files as file}
-						<div class="file">
+						<div class="file" transition:fly>
 							<IconAudio/>
 							<span>{file.name}</span>
 						</div>
@@ -93,13 +94,9 @@
   .root {
     position: relative;
     display: flex;
-    width: auto;
-    height: auto;
+    width: 100%;
+    height: 100%;
     display: flex;
-    max-width: 864px;
-    max-height: max(60vh, 60vw);
-    min-height: min(20vh, 20vw);
-    min-width: max(20vh, 20vw);
     justify-content: space-between;
     align-items: center;
     flex-direction: column;

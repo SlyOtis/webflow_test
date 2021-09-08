@@ -4,8 +4,11 @@
   import WaveformData from 'waveform-data/dist/waveform-data'
   import Background from "./components/Background.svelte";
   import LogoHerro from "./components/LogoHerro.svelte";
+  import {fly} from "svelte/transition";
+  import {onMount} from "svelte";
 
   let files: Array<InputFile>
+  let ready = false
 
   const audioContext = new AudioContext();
 
@@ -33,34 +36,46 @@
     })
   }
 
-  function onInput({detail}: {detail: InputFile}) {
+  function onInput({detail}: { detail: InputFile }) {
     generateWave(detail)
   }
 
+  onMount(() => {
+    ready = false
+    fetch('https://fonts.googleapis.com/css2?family=PT+Sans+Narrow&display=swap')
+      .then(res => {
+        console.log(res)
+        ready = true
+      })
+  })
+
 </script>
 
-<main>
-  <LogoHerro />
-  <Background />
-  <FileUpload
-      on:input={onInput}
-      bind:files={files}
-  />
-</main>
+<LogoHerro/>
+<Background/>
+
+{#if ready}
+	<main transition:fly={{delay: 350, y: 200, opacity: 0}}>
+		<FileUpload
+				on:input={onInput}
+				bind:files={files}
+		/>
+	</main>
+{/if}
 
 <style>
   main {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: relative;
+    width: auto;
+    height: auto;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    padding: 16px 32px;
-    background-color: #212121;
-    overflow: hidden;
+    z-index: 1;
+    max-width: max(60vh, 60vw);
+    max-height: min(60vh, 60vw);
+    min-height: max(20vh, 20vw);
+    min-width: max(20vh, 20vw);
   }
 </style>

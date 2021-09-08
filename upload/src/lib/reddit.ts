@@ -327,8 +327,6 @@ function getRandomCachedImage(currentCursor: RedditCursorIndex = null): RedditIm
       index
     } = currentCursor || cache.currentCursor || resetCursorIndex(cache)
 
-    console.log(key, index)
-
     const images = cache.images[key]
     const cursor = cache.cursors[key]
 
