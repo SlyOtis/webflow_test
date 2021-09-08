@@ -29,6 +29,8 @@
     .sort((a, b) => compareDesc(a.createdAt, b.createdAt))
     .slice(indexShift, 2)
 
+  console.log(ready)
+
   function notifyImagesChanged() {
     images = images
   }
@@ -43,7 +45,6 @@
   }
 
   async function updateBackground() {
-    const index = images.length
     try {
       const img = await getRandomImageCached()
       if (img && fetchReady) {
@@ -56,25 +57,22 @@
         }
 
         images.push(image)
-        notifyImagesChanged()
+	      notifyImagesChanged()
 
-        while (images.length >= maxBackStack) {
-          images.shift()
-          notifyImagesChanged()
-        }
+	      images = images.slice(Math.max(images.length - maxBackStack, 0))
 
         //TODO:: add propper image loading  and error handling
-
         await fetch(image.url, {
           method: 'GET',
           mode: 'no-cors',
           redirect: 'follow'
         }).catch(err => {
-          console.error(err)
-          images.splice(index, 1)
+          const deleted = images.splice(images.findIndex(val => val.url === image.url), 1)
+          console.error(`Failed to: ${err}\n deleted: ${JSON.stringify(deleted)}`,)
+	        notifyImagesChanged()
         }).then(_ => {
           fetchReady = true
-          images[index] = {
+          images[images.findIndex(val => val.url === image.url)] = {
             ...image,
             loaded: true
           }
