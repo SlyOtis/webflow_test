@@ -29,8 +29,6 @@
     .sort((a, b) => compareDesc(a.createdAt, b.createdAt))
     .slice(indexShift, 2)
 
-  console.log(ready)
-
   function notifyImagesChanged() {
     images = images
   }
