@@ -44,7 +44,6 @@
     ready = false
     fetch('https://fonts.googleapis.com/css2?family=PT+Sans+Narrow&display=swap')
       .then(res => {
-        console.log(res)
         ready = true
       })
   })
