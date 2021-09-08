@@ -50,12 +50,14 @@
         }
 
         images.push(image)
+        notifyImagesChanged()
 
 	      while (images.length >= maxBackStack) {
 	        images.shift()
+          notifyImagesChanged()
 	      }
 
-        notifyImagesChanged()
+	      //TODO:: add propper image loading  and error handling
 
         await fetch(image.url, {
           method: 'GET',
@@ -64,15 +66,14 @@
         }).catch(err => {
           console.error(err)
           images.splice(index, 1)
-        }).then(res => {
+        }).then(_ => {
           fetchReady = true
           images[index] = {
             ...image,
             loaded: true
           }
+          notifyImagesChanged()
         })
-
-        notifyImagesChanged()
       }
 
       if (autoChange) {
