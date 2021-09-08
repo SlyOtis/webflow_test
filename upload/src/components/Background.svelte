@@ -23,6 +23,7 @@
   let controlsVisible = false
   let indexShift = 0
   let fetchReady = true
+  let timeout: any
 
   $: ready = images.filter(val => val.loaded)
     .sort((a, b) => compareDesc(a.createdAt, b.createdAt))
@@ -32,9 +33,14 @@
     images = images
   }
 
-  const delayed = (callback: () => any) => new Promise(resolve => setTimeout(() => {
-    resolve(callback())
-  }, changeDelay * 1000))
+  function delayed(callback: () => any) {
+		clearTimeout(timeout)
+    return new Promise(resolve => {
+      timeout = setTimeout(() => {
+        resolve(callback())
+      }, changeDelay * 1000)
+    })
+  }
 
   async function updateBackground() {
     const index = images.length
@@ -52,12 +58,12 @@
         images.push(image)
         notifyImagesChanged()
 
-	      while (images.length >= maxBackStack) {
-	        images.shift()
+        while (images.length >= maxBackStack) {
+          images.shift()
           notifyImagesChanged()
-	      }
+        }
 
-	      //TODO:: add propper image loading  and error handling
+        //TODO:: add propper image loading  and error handling
 
         await fetch(image.url, {
           method: 'GET',
@@ -87,15 +93,15 @@
 
   function shiftIndex() {
     indexShift++
-	  if (indexShift >= images.length - 2) {
-	    indexShift = images.length - 2
-	  }
+    if (indexShift >= images.length - 2) {
+      indexShift = images.length - 2
+    }
 
     ready = images.filter(val => val.loaded)
       .sort((a, b) => compareDesc(a.createdAt, b.createdAt))
       .slice(indexShift, 2)
 
-	  console.log(indexShift)
+    console.log(indexShift)
   }
 
   onMount(() => {
@@ -206,7 +212,7 @@
     right: 0;
     margin-right: 16px;
     margin-top: 16px;
-	  opacity: 0.45;
+    opacity: 0.45;
   }
 
   .controls > button {
