@@ -8,7 +8,7 @@
 
   let input: HTMLInputElement
   export let files: Array<InputFile> = []
-  let invalidFile = false
+  let invalidFile = false, dragOver = false
 
   function updateFiles(file: File): boolean {
 
@@ -29,7 +29,7 @@
 
   function onInput(e) {
     for (let i = 0; i < input.files.length; i++) {
-	    updateFiles(input.files.item(i))
+      updateFiles(input.files.item(i))
     }
 
     input.value = null
@@ -41,18 +41,21 @@
   function eachTransferFile(e, callback?: (file: File) => void): Array<File> {
     const files = e.dataTransfer.files; // Array of all files
 
-    invalidFile = false
-	  let _invalidFile = false, _files = []
-    for (let i=0, file; file=files[i]; i++) {
-      if (!file.type.match(/audio.*/)) {
-        _invalidFile = true
-        console.log(file)
-	      continue
-      } else if (callback) callback(file)
-	    _files.push(file)
+    let _invalidFiles = !files?.length, _files = []
+    for (let i = 0, file; file = files[i]; i++) {
+      if (file.type.match(/audio.*/)) {
+        if (callback) {
+          callback(file)
+        }
+        _files.push(file)
+        continue
+      }
+      _invalidFiles = true
     }
-    invalidFile = _invalidFile
-	  return _files
+
+    invalidFile = _invalidFiles
+
+    return _files
   }
 
   function onDragOver(e): boolean {
@@ -60,28 +63,37 @@
     e.stopPropagation()
 
     e.dataTransfer.effectAllowed = 'all'
-	  e.dataTransfer.dropEffect = 'copy'
+    e.dataTransfer.dropEffect = 'copy'
 
-	  eachTransferFile(e)
+    eachTransferFile(e)
 
     return !invalidFile
   }
 
   function onDrop(e) {
     e.preventDefault()
-	  e.stopPropagation()
+    e.stopPropagation()
 
-    invalidFile = false
+    dragCancel()
 
-    eachTransferFile(e, file => {
+    if (eachTransferFile(e, file => {
       updateFiles(file)
-    })
+    }).length <= 0) {
+      return false
+    }
 
     input.value = null
     input.files = null
 
     files = files
+	  return true
+  }
 
+  function dragCancel() {
+    invalidFile = false
+    dragOver = false
+
+    console.log('cancel')
   }
 
 
@@ -89,13 +101,15 @@
 
 <form>
 	<div class="root card-background"
-	     on:dragover={onDragOver}
-	     on:drop={onDrop}
-	     on:dragleave={() => invalidFile = false}
-	     on:dragend={() => invalidFile = false}
+	     on:dragenter={() => dragOver = true}
 	>
-		<div class="error" class:error={invalidFile}>
-			<p>NO!</p>
+		<div class="overlay" class:display={dragOver}
+		     on:dragleave={dragCancel}
+		     on:dragover={onDragOver}
+		     on:drop={onDrop}
+		     on:dragleave={dragCancel}
+		>
+			<p class:display={invalidFile}>NO!</p>
 		</div>
 		<div class="inner" class:invalid-file={invalidFile}>
 			<slot {files}/>
@@ -138,18 +152,31 @@
     overflow-wrap: break-word;
   }
 
-  .error {
+  .overlay {
     position: absolute;
     z-index: 99;
     background: #546E7A;
     display: none;
-    opacity: 0.55;
+    border: 0;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    width: 100%;
-    height: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+    transition: 250ms all ease-out;
+	  user-select: none;
+  }
+
+  .overlay > * {
+	  pointer-events: none;
+	  user-select: none;
+  }
+
+  .display {
+    display: flex;
   }
 
   .invalid-file {
