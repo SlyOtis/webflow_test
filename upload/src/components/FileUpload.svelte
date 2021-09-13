@@ -23,7 +23,7 @@
 
       const inputFile = {
         id: uuid().toString(),
-        name: "",
+        name: file.name,
         file
       }
 
@@ -39,7 +39,7 @@
 
     files = files
 
-	  calculateColumns()
+    calculateColumns()
   }
 
   let gridTemplateColumns = 'unset'
@@ -51,7 +51,7 @@
 
 </script>
 
-<svelte:window on:resize={calculateColumns} />
+<svelte:window on:resize={calculateColumns}/>
 
 <form>
 	<div class="root">
@@ -67,8 +67,11 @@
 				<div class="files" style="grid-template-columns: {gridTemplateColumns};">
 					{#each files as file}
 						<div class="file" transition:fly>
-							<IconAudio/>
-							<Waveform data={file.data} />
+							{#if file.data}
+								<Waveform data={file.data}/>
+							{:else}
+								<IconAudio/>
+							{/if}
 							<span>{file.name}</span>
 						</div>
 					{/each}
@@ -140,10 +143,10 @@
     display: grid;
     width: 100%;
     height: 100%;
-	  grid-template-columns: repeat(1, 100px);
-	  grid-auto-rows: 100px;
-	  place-items: start stretch;
-	  gap: 8px;
+    grid-template-columns: repeat(1, 100px);
+    grid-auto-rows: 100px;
+    place-items: start stretch;
+    gap: 8px;
     padding: 16px;
     overflow-x: hidden;
     overflow-y: auto;
@@ -227,13 +230,13 @@
     user-select: none;
     color: #BDBDBD;
     padding: 16px;
-	  transition: 250ms all ease-out;
+    transition: 250ms all ease-out;
   }
 
   .empty-text {
     position: relative;
     width: 100%;
-	  height: auto;
+    height: auto;
     text-align: center;
     font-size: 1.2em;
   }

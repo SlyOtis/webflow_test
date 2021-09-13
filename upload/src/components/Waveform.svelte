@@ -24,17 +24,12 @@
     const channel = data.channel(0)
 	  let _samples = []
     for (let x = 0; x < data.length; x++) {
-      // console.log(channel.max_sample(x), channel.min_sample(x))
 	    const sample = {
         top: scaleY(channel.max_sample(x), maxY),
         bottom: scaleY(channel.min_sample(x), maxY)
       }
-      // console.log(sample)
-
       _samples.push(sample);
     }
-
-    // console.log(_samples)
 
     return _samples
   }
