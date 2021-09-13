@@ -51,7 +51,36 @@
 						y={maxY - top}
 						width={sampleWidth}
 						height="{Math.abs(top) + Math.abs(bottom)}"
+						style={`
+							animation-delay: ${i * 2}ms;
+							transform-origin: ${i * (sampleWidth + sampleGap)}px center;
+						`}
 				/>
 		{/each}
 	</svg>
 {/if}
+
+<style>
+	@keyframes sample {
+		0% {
+			z-index: 2;
+			transform: scale(1);
+		}
+		80% {
+      z-index: 100;
+      transform: scale(1.5);
+		}
+    100% {
+      z-index: 1;
+      transform: scale(1);
+    }
+  }
+
+	rect {
+		animation-name: sample;
+		animation-duration: 350ms;
+		transform-origin: center;
+		transition-timing-function: ease-out;
+		z-index: 1;
+	}
+</style>

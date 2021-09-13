@@ -12,6 +12,10 @@
   height: 100%;
 }
 
+.svg-trans {
+  transition: 250ms all ease-out;
+}
+
 body, html {
   position: absolute;
   top: 0;
