@@ -1,4 +1,7 @@
 import random from 'random'
+import eachMinuteOfInterval from 'date-fns/eachMinuteOfInterval'
+import {writable} from 'svelte/store'
+import {get_store_value} from "svelte/internal";
 
 type RedditImage = {
   url: string
@@ -31,7 +34,10 @@ export type SubReddit = {
   r: string
   flair?: string
   sort?: 'hot' | 'new' | 'top' | 'rising'
+  updatedAt?: Date
 }
+
+export type SubRedditDict = {[r: string]: SubReddit}
 
 interface ImageResolution {
   width: number,
@@ -64,6 +70,8 @@ export type RedditCursorIndex = {
 
 export type RedditCache = {
   currentCursor?: RedditCursorIndex
+  updatedAt?: Date
+  subreddits: SubRedditDict
   cursors: {
     [key: string]: RedditCacheCursor
   },
@@ -71,6 +79,12 @@ export type RedditCache = {
     [key: string]: Array<RedditImage>
   }
 }
+
+const redditStore = writable<RedditCache | null>(getCachedState())
+
+redditStore.subscribe(value => {
+  localStorage.setItem('reddit_images', JSON.stringify(value))
+})
 
 
 //
@@ -100,7 +114,8 @@ function getValidUrl(post: RedditPost): string | null {
     url.endsWith('.jpg') ||
     url.endsWith('.jpeg') ||
     url.endsWith('.webm') ||
-    url.endsWith('.png')
+    url.endsWith('.png') ||
+    url.endsWith('.mp4')
   ) {//TODO:: Fix supported formats
     return url
   }
@@ -184,43 +199,50 @@ function isValidSize(_state: RedditPreviewConfig, img: RedditPreviewImage): bool
   return resolutions.length >= 1
 }
 
-const defaultSubreddits: Array<SubReddit> = [
-  {
+const defaultSubreddits: { [r: string]: SubReddit } = {
+  'wallpapers': {
     name: 'Wallpapers',
     r: 'wallpapers',
     sort: 'hot'
-  },
-  {
+  }
+  ,
+  'edm': {
     name: 'EDM',
     r: 'EDM',
     flair: 'Photo',
     sort: 'hot'
   },
-  {
+  'Offensive_Wallpapers': {
     name: 'Offencive Wallpapers',
     r: 'Offensive_Wallpapers',
     sort: 'hot'
-  },
-  {
-    name: 'feetandbbc',
-    r: 'feetandbbc',
-    sort: 'hot'
-  },
-  {
+  }
+  ,
+// {
+//   name: 'feetandbbc',
+//   r: 'feetandbbc',
+//   sort: 'hot'
+// },
+  'trippy': {
     name: 'Trippy',
     r: 'trippy',
     sort: 'hot'
   },
-  {
+  'DrugArt': {
     name: 'DrugArt',
     r: 'DrugArt',
     sort: 'hot'
+  },
+  'multiwall': {
+    name: 'Multiwall',
+    r: 'multiwall',
+    sort: 'hot'
   }
-]
+}
 
 
 export const getImages = (sub: SubReddit = defaultSubreddits[0]): Promise<Array<RedditPreviewImage>> => fetch(getRedditApiUrl(sub), {
-  method: 'GET'
+  method: 'GET',
 }).then(resp => {
   if (resp.ok) {
     return resp.json()
@@ -294,20 +316,6 @@ function getCachedState(): RedditCache | null {
   return null
 }
 
-function setCachedState(cache: RedditCache): RedditCache {
-  localStorage.setItem('reddit_images', JSON.stringify(cache))
-  return cache
-}
-
-function updateCachedState(updater: (state: RedditCache) => RedditCache): RedditCache {
-  const existing = getCachedState() || {
-    cursors: {},
-    images: {}
-  }
-
-  const next: RedditCache = updater(existing)
-  return setCachedState(next)
-}
 
 function resetCursorIndex(cache: RedditCache): RedditCursorIndex {
   const keys = Object.keys(cache.cursors)
@@ -319,9 +327,18 @@ function resetCursorIndex(cache: RedditCache): RedditCursorIndex {
   return cache.currentCursor
 }
 
-function getRandomCachedImage(currentCursor: RedditCursorIndex = null): RedditImage | null {
+async function getRandomCachedImage(currentCursor: RedditCursorIndex = null): Promise<RedditImage | null> {
   const cache = getCachedState()
+
   if (cache) {
+
+    if (cache.updatedAt) {
+      const min = eachMinuteOfInterval({start: cache.updatedAt, end: new Date()},)
+      console.log(min)
+    } else {
+      return null
+    }
+
     let {
       key,
       index
@@ -343,11 +360,17 @@ function getRandomCachedImage(currentCursor: RedditCursorIndex = null): RedditIm
       index
     }
 
-    setCachedState(cache)
+    redditStore.set(cache)
+
     return images[cursor.start]
   }
 
   return null
+}
+
+
+function shouldRefetch(cache: RedditCache) {
+  return
 }
 
 function getNextCachedImage(currentCursor: RedditCursorIndex = null): RedditImage | null {
@@ -381,13 +404,13 @@ function getNextCachedImage(currentCursor: RedditCursorIndex = null): RedditImag
         index
       }
 
-      setCachedState(cache)
+      redditStore.set(cache)
       return getNextCachedImage()
     }
 
     cursor.start++
     cache.cursors[key] = cursor
-    setCachedState(cache)
+    redditStore.set(cache)
 
     return images[cursor.start]
   }
@@ -395,16 +418,24 @@ function getNextCachedImage(currentCursor: RedditCursorIndex = null): RedditImag
   return null
 }
 
-export async function getNextImageCached(subs: Array<SubReddit> = defaultSubreddits): Promise<RedditImage | null> {
+export async function getNextImageCached(subs: SubRedditDict = defaultSubreddits): Promise<RedditImage | null> {
   const image = getNextCachedImage()
   if (image) {
     return Promise.resolve(image)
   }
 
-  for (const sub of subs) {
+  for (const r of Object.keys(subs)) {
+    const sub = subs[r]
     const images = await getRedditImages(sub)
-    updateCachedState(prev => ({
+    redditStore.update(prev => ({
       ...prev,
+      subreddits: {
+        ...subs,
+        [r]: {
+          ...sub,
+          updatedAt: new Date()
+        }
+      },
       images: {
         ...prev.images,
         [sub.name]: images
@@ -421,11 +452,20 @@ export async function getNextImageCached(subs: Array<SubReddit> = defaultSubredd
   return Promise.resolve(image)
 }
 
-async function fetchImagesForSubs(subs: Array<SubReddit>){
-  for (const sub of subs) {
+async function fetchImagesForSubs(subs: SubRedditDict) {
+  for (const r of Object.keys(subs)) {
+    const sub = subs[r]
     const images = await getRedditImages(sub)
-    updateCachedState(prev => ({
+    redditStore.update(prev => ({
       ...prev,
+      updatedAt: new Date(),
+      subreddits: {
+        ...subs,
+        [r]: {
+          ...sub,
+          updatedAt: new Date()
+        }
+      },
       images: {
         ...prev.images,
         [sub.name]: images
@@ -438,14 +478,16 @@ async function fetchImagesForSubs(subs: Array<SubReddit>){
       }
     }))
   }
+
 }
 
-export async function getRandomImageCached(subs: Array<SubReddit> = defaultSubreddits): Promise<RedditImage | null> {
+export async function getRandomImageCached(subs: SubRedditDict = defaultSubreddits): Promise<RedditImage | null> {
   const image = getRandomCachedImage()
   if (image) {
     return Promise.resolve(image)
   }
 
-  await fetchImagesForSubs(subs)
-  return Promise.resolve(getRandomCachedImage())
+  fetchImagesForSubs(subs)
+
+  return getRandomCachedImage()
 }

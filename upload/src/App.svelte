@@ -6,11 +6,14 @@
   import LogoHerro from "./components/LogoHerro.svelte";
   import {fly} from "svelte/transition";
   import {onMount} from "svelte";
+  import UploadInfo from "./components/UploadInfo.svelte";
+  import FilesList from "./components/FilesList.svelte";
 
   let files: Array<InputFile>
   let ready = false
 
   const audioContext = new AudioContext();
+
 
   function generateWave(inn: InputFile) {
     inn.file.arrayBuffer().then(buffer => {
@@ -32,8 +35,8 @@
       });
     }).then((res: WaveformData) => {
       inn.data = res as any
-	    files[files.findIndex(val => val.id === inn.id)] = inn
-	    files = files
+      files[files.findIndex(val => val.id === inn.id)] = inn
+      files = files
     })
   }
 
@@ -58,7 +61,12 @@
 	<main transition:fly={{delay: 350, y: 200, opacity: 0}}>
 		<FileUpload
 				on:input={onInput}
-				bind:files={files}
+				bind:files
+		>
+			<FilesList bind:files/>
+		</FileUpload>
+		<UploadInfo
+				bind:files
 		/>
 	</main>
 {/if}

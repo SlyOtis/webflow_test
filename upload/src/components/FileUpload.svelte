@@ -1,82 +1,104 @@
 <script lang="ts">
-  import IconAudio from "../icons/IconAudio.svelte";
   import {createEventDispatcher} from "svelte";
   import {InputFile} from "../lib/utils";
   import {v4 as uuid} from 'uuid'
   import IconBreasts from "../icons/IconBreasts.svelte";
-  import IconDownRight from "../icons/IconDownRight.svelte";
-  import {fly} from "svelte/transition";
-  import Waveform from "./Waveform.svelte";
 
   const dispatch = createEventDispatcher()
 
   let input: HTMLInputElement
   export let files: Array<InputFile> = []
+  let invalidFile = false
+
+  function updateFiles(file: File): boolean {
+
+    if (!file.type.startsWith('audio')) {
+      return false
+    }
+
+    const inputFile = {
+      id: uuid().toString(),
+      name: file.name,
+      file
+    }
+
+    files.push(inputFile)
+    files = files
+    dispatch('input', inputFile)
+  }
 
   function onInput(e) {
     for (let i = 0; i < input.files.length; i++) {
-      const file = input.files.item(i) as File
-
-      if (!file.type.startsWith('audio')) {
-        continue
-      }
-
-      const inputFile = {
-        id: uuid().toString(),
-        name: file.name,
-        file
-      }
-
-      files.push(inputFile)
-
-      files = files
-
-      dispatch('input', inputFile)
+	    updateFiles(input.files.item(i))
     }
 
     input.value = null
     input.files = null
 
     files = files
-
-    calculateColumns()
   }
 
-  let gridTemplateColumns = 'unset'
+  function eachTransferFile(e, callback?: (file: File) => void): Array<File> {
+    const files = e.dataTransfer.files; // Array of all files
 
-  function calculateColumns() {
-    const columnCount = Math.max(1, Math.min(files.length, Math.floor((window.innerWidth * 0.8) / 100) - 1))
-    gridTemplateColumns = `repeat(${columnCount}, 100px)`
+    invalidFile = false
+	  let _invalidFile = false, _files = []
+    for (let i=0, file; file=files[i]; i++) {
+      if (!file.type.match(/audio.*/)) {
+        _invalidFile = true
+        console.log(file)
+	      continue
+      } else if (callback) callback(file)
+	    _files.push(file)
+    }
+    invalidFile = _invalidFile
+	  return _files
   }
+
+  function onDragOver(e): boolean {
+    e.preventDefault()
+    e.stopPropagation()
+
+    e.dataTransfer.effectAllowed = 'all'
+	  e.dataTransfer.dropEffect = 'copy'
+
+	  eachTransferFile(e)
+
+    return !invalidFile
+  }
+
+  function onDrop(e) {
+    e.preventDefault()
+	  e.stopPropagation()
+
+    invalidFile = false
+
+    eachTransferFile(e, file => {
+      updateFiles(file)
+    })
+
+    input.value = null
+    input.files = null
+
+    files = files
+
+  }
+
 
 </script>
 
-<svelte:window on:resize={calculateColumns}/>
-
 <form>
-	<div class="root">
-		<div class="inner">
-			{#if files.length <= 0}
-				<div class="empty">
-					<span class="empty-text">Flick the tits to upload songs.</span>
-					<span class="icon">
-					<IconDownRight/>
-				</span>
-				</div>
-			{:else}
-				<div class="files" style="grid-template-columns: {gridTemplateColumns};">
-					{#each files as file}
-						<div class="file" transition:fly>
-							{#if file.data}
-								<Waveform data={file.data}/>
-							{:else}
-								<IconAudio/>
-							{/if}
-							<span>{file.name}</span>
-						</div>
-					{/each}
-				</div>
-			{/if}
+	<div class="root card-background"
+	     on:dragover={onDragOver}
+	     on:drop={onDrop}
+	     on:dragleave={() => invalidFile = false}
+	     on:dragend={() => invalidFile = false}
+	>
+		<div class="error" class:error={invalidFile}>
+			<p>NO!</p>
+		</div>
+		<div class="inner" class:invalid-file={invalidFile}>
+			<slot {files}/>
 		</div>
 		<button on:click|preventDefault|stopPropagation={ () => input.click()}>
 			<IconBreasts/>
@@ -104,6 +126,37 @@
     z-index: 1;
   }
 
+  .inner {
+    position: relative;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    transition: 350ms all ease-out;
+    border-radius: 8px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .error {
+    position: absolute;
+    z-index: 99;
+    background: #546E7A;
+    display: none;
+    opacity: 0.55;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .invalid-file {
+    filter: blur(25px);
+    display: block;
+  }
+
   input {
     display: none;
   }
@@ -116,62 +169,8 @@
     justify-content: space-between;
     align-items: center;
     flex-direction: column;
-    background-color: #EEEEEE;
     border-radius: 8px;
-    border: 1px solid #E0E0E0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     transition: 350ms all ease-out;
-  }
-
-  .inner {
-    position: relative;
-    text-align: center;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    transition: 350ms all ease-out;
-    border-radius: 8px;
-  }
-
-  * {
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-  }
-
-  .files {
-    position: relative;
-    display: grid;
-    width: 100%;
-    height: 100%;
-    grid-template-columns: repeat(1, 100px);
-    grid-auto-rows: 100px;
-    place-items: start stretch;
-    gap: 8px;
-    padding: 16px;
-    overflow-x: hidden;
-    overflow-y: auto;
-    border: none;
-    transition: 350ms all ease-out;
-  }
-
-  .file {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    border-radius: 8px;
-    background-color: white;
-    transition: 350ms all ease-out;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .file:hover {
-    cursor: pointer;
-    transform: translateY(-1vh);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    z-index: 2;
   }
 
   button {
@@ -197,7 +196,7 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    z-index: 10;
+    z-index: 100;
   }
 
   button > span {
@@ -215,34 +214,5 @@
   button:active {
     transform: scale(0.99);
     box-shadow: 0 0 3px rgba(0, 0, 0, 0.12), 0 0 2px rgba(0, 0, 0, 0.24);
-  }
-
-  .empty {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    min-height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    background: none;
-    user-select: none;
-    color: #BDBDBD;
-    padding: 16px;
-    transition: 250ms all ease-out;
-  }
-
-  .empty-text {
-    position: relative;
-    width: 100%;
-    height: auto;
-    text-align: center;
-    font-size: 1.2em;
-  }
-
-  .icon {
-    width: 10vh;
-    height: 10vh;
   }
 </style>
