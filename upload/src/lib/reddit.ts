@@ -1,5 +1,5 @@
 import random from 'random'
-import eachMinuteOfInterval from 'date-fns/eachMinuteOfInterval'
+import intervalToDuration from 'date-fns/intervalToDuration'
 import {writable} from 'svelte/store'
 import {get_store_value} from "svelte/internal";
 
@@ -327,14 +327,15 @@ function resetCursorIndex(cache: RedditCache): RedditCursorIndex {
   return cache.currentCursor
 }
 
-async function getRandomCachedImage(currentCursor: RedditCursorIndex = null): Promise<RedditImage | null> {
-  const cache = getCachedState()
+function getRandomCachedImage(currentCursor: RedditCursorIndex = null): RedditImage | null {
+  const cache = get_store_value<RedditCache>(redditStore)
 
   if (cache) {
 
     if (cache.updatedAt) {
-      const min = eachMinuteOfInterval({start: cache.updatedAt, end: new Date()},)
-      console.log(min)
+      if (intervalToDuration({start: new Date(cache.updatedAt), end: new Date()},).minutes > 20) {
+        return null
+      }
     } else {
       return null
     }
@@ -368,14 +369,17 @@ async function getRandomCachedImage(currentCursor: RedditCursorIndex = null): Pr
   return null
 }
 
-
-function shouldRefetch(cache: RedditCache) {
-  return
-}
-
 function getNextCachedImage(currentCursor: RedditCursorIndex = null): RedditImage | null {
-  const cache = getCachedState()
+  const cache = get_store_value<RedditCache>(redditStore)
   if (cache) {
+
+    if (cache.updatedAt) {
+      if (intervalToDuration({start: new Date(cache.updatedAt), end: new Date()},).minutes > 20) {
+        return null
+      }
+    } else {
+      return null
+    }
 
     let {
       key,
@@ -424,59 +428,40 @@ export async function getNextImageCached(subs: SubRedditDict = defaultSubreddits
     return Promise.resolve(image)
   }
 
-  for (const r of Object.keys(subs)) {
-    const sub = subs[r]
-    const images = await getRedditImages(sub)
-    redditStore.update(prev => ({
-      ...prev,
-      subreddits: {
-        ...subs,
-        [r]: {
-          ...sub,
-          updatedAt: new Date()
-        }
-      },
-      images: {
-        ...prev.images,
-        [sub.name]: images
-      },
-      cursors: {
-        ...prev.cursors,
-        [sub.name]: {
-          start: 0
-        }
-      }
-    }))
-  }
+  await fetchImagesForSubs(subs)
 
-  return Promise.resolve(image)
+  return Promise.resolve(getNextCachedImage())
 }
 
 async function fetchImagesForSubs(subs: SubRedditDict) {
   for (const r of Object.keys(subs)) {
+
     const sub = subs[r]
     const images = await getRedditImages(sub)
-    redditStore.update(prev => ({
-      ...prev,
-      updatedAt: new Date(),
-      subreddits: {
-        ...subs,
-        [r]: {
-          ...sub,
-          updatedAt: new Date()
-        }
-      },
-      images: {
-        ...prev.images,
-        [sub.name]: images
-      },
-      cursors: {
-        ...prev.cursors,
-        [sub.name]: {
-          start: 0
+
+    redditStore.update(prev => {
+      return {
+        ...prev,
+        updatedAt: new Date(),
+        subreddits: {
+          ...subs,
+          [r]: {
+            ...sub,
+            updatedAt: new Date()
+          }
+        },
+        images: {
+          ...prev?.images,
+          [sub.name]: images
+        },
+        cursors: {
+          ...prev?.cursors,
+          [sub.name]: {
+            start: 0
+          }
         }
       }
-    }))
+    })
   }
 
 }
@@ -487,7 +472,7 @@ export async function getRandomImageCached(subs: SubRedditDict = defaultSubreddi
     return Promise.resolve(image)
   }
 
-  fetchImagesForSubs(subs)
+  await fetchImagesForSubs(subs)
 
   return getRandomCachedImage()
 }

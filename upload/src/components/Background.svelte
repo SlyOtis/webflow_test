@@ -1,9 +1,8 @@
 <script lang="ts">
-  import {getRandomImageCached} from '../lib/reddit'
+  import {getNextImageCached, getRandomImageCached} from '../lib/reddit'
   import {onMount} from 'svelte'
   import {fade} from 'svelte/transition'
   import compareDesc from 'date-fns/compareDesc'
-  import IconPrevious from "../icons/IconPrevious.svelte";
   import IconNext from "../icons/IconNext.svelte";
 
   export let changeDelay = 20
@@ -42,6 +41,50 @@
     })
   }
 
+  async function nextImage() {
+    try {
+      const img = await getNextImageCached()
+      if (img && fetchReady) {
+        fetchReady = false
+
+        const image: BackgroundImage = {
+          createdAt: new Date(),
+          loaded: false,
+          url: img.url
+        }
+
+        images.push(image)
+        notifyImagesChanged()
+
+        images = images.slice(Math.max(images.length - maxBackStack, 0))
+
+        await fetchImage(image)
+      }
+    } catch (e) {
+        console.error(e)
+      }
+  }
+
+  async function fetchImage(image: BackgroundImage) {
+    //TODO:: add propper image loading  and error handling
+    return await fetch(image.url, {
+      method: 'GET',
+      mode: 'no-cors',
+      redirect: 'follow'
+    }).catch(err => {
+      const deleted = images.splice(images.findIndex(val => val.url === image.url), 1)
+      console.error(`Failed to: ${err}\n deleted: ${JSON.stringify(deleted)}`,)
+      notifyImagesChanged()
+    }).then(_ => {
+      fetchReady = true
+      images[images.findIndex(val => val.url === image.url)] = {
+        ...image,
+        loaded: true
+      }
+      notifyImagesChanged()
+    })
+  }
+
   async function updateBackground() {
     try {
       const img = await getRandomImageCached()
@@ -59,23 +102,7 @@
 
 	      images = images.slice(Math.max(images.length - maxBackStack, 0))
 
-        //TODO:: add propper image loading  and error handling
-        await fetch(image.url, {
-          method: 'GET',
-          mode: 'no-cors',
-          redirect: 'follow'
-        }).catch(err => {
-          const deleted = images.splice(images.findIndex(val => val.url === image.url), 1)
-          console.error(`Failed to: ${err}\n deleted: ${JSON.stringify(deleted)}`,)
-	        notifyImagesChanged()
-        }).then(_ => {
-          fetchReady = true
-          images[images.findIndex(val => val.url === image.url)] = {
-            ...image,
-            loaded: true
-          }
-          notifyImagesChanged()
-        })
+        await fetchImage(image)
       }
 
       if (autoChange) {
@@ -128,7 +155,7 @@
 				<!--		<IconPrevious/>-->
 				<!--	</button>-->
 				<!--{/if}-->
-				<button on:click|stopPropagation|preventDefault={updateBackground}>
+				<button on:click|stopPropagation|preventDefault={nextImage}>
 					<IconNext/>
 				</button>
 			</div>
