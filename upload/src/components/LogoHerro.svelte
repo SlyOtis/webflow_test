@@ -21,6 +21,7 @@
     height: auto;
 		transform-origin: center;
 		transform: rotate(-15deg);
+		min-width: 100px;
 	}
 
 </style>

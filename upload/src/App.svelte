@@ -31,8 +31,9 @@
         });
       });
     }).then((res: WaveformData) => {
-      console.log(res)
-      console.log(JSON.stringify(res))
+      inn.data = res as any
+	    files[files.findIndex(val => val.id === inn.id)] = inn
+	    files = files
     })
   }
 
@@ -72,9 +73,9 @@
     align-items: center;
     flex-direction: column;
     z-index: 1;
-    max-width: max(60vh, 60vw);
-    max-height: min(60vh, 60vw);
-    min-height: max(20vh, 20vw);
-    min-width: max(20vh, 20vw);
+	  max-width: 80vw;
+	  max-height: 80vh;
+	  min-width: 116px;
+	  min-height: 116px;
   }
 </style>

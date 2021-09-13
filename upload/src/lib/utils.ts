@@ -11,7 +11,7 @@ export type InputFile = {
   id: string
   name: string
   file: File
-  waveformData?: WaveformData
+  data?: WaveformData
   loading?: Array<InputFileLoading>
 }
 

@@ -6,6 +6,7 @@
   import IconBreasts from "../icons/IconBreasts.svelte";
   import IconDownRight from "../icons/IconDownRight.svelte";
   import {fly} from "svelte/transition";
+  import Waveform from "./Waveform.svelte";
 
   const dispatch = createEventDispatcher()
 
@@ -37,25 +38,37 @@
     input.files = null
 
     files = files
+
+	  calculateColumns()
+  }
+
+  let gridTemplateColumns = 'unset'
+
+  function calculateColumns() {
+    const columnCount = Math.max(1, Math.min(files.length, Math.floor((window.innerWidth * 0.8) / 100) - 1))
+    gridTemplateColumns = `repeat(${columnCount}, 100px)`
   }
 
 </script>
+
+<svelte:window on:resize={calculateColumns} />
 
 <form>
 	<div class="root">
 		<div class="inner">
 			{#if files.length <= 0}
 				<div class="empty">
-					<span class="empty-text">Click the tits to upload songs.</span>
+					<span class="empty-text">Flick the tits to upload songs.</span>
 					<span class="icon">
 					<IconDownRight/>
 				</span>
 				</div>
 			{:else}
-				<div class="files">
+				<div class="files" style="grid-template-columns: {gridTemplateColumns};">
 					{#each files as file}
 						<div class="file" transition:fly>
 							<IconAudio/>
+							<Waveform data={file.data} />
 							<span>{file.name}</span>
 						</div>
 					{/each}
@@ -76,6 +89,7 @@
 </form>
 
 <style>
+
   form {
     position: relative;
     width: 100%;
@@ -96,23 +110,18 @@
     display: flex;
     width: 100%;
     height: 100%;
-    display: flex;
     justify-content: space-between;
     align-items: center;
     flex-direction: column;
-    background-color: #E0E0E0;
+    background-color: #EEEEEE;
     border-radius: 8px;
-    border: 1px solid #BDBDBD;
+    border: 1px solid #E0E0E0;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     transition: 350ms all ease-out;
   }
 
   .inner {
     position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
     text-align: center;
     width: 100%;
     height: 100%;
@@ -121,15 +130,20 @@
     border-radius: 8px;
   }
 
+  * {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
   .files {
     position: relative;
     display: grid;
     width: 100%;
-    height: auto;
-    min-height: min(20vh, 20vw);
-    grid-template-columns: repeat(4, minmax(100px, 1fr));
-    grid-auto-rows: minmax(100px, 1fr);
-    grid-gap: 8px;
+    height: 100%;
+	  grid-template-columns: repeat(1, 100px);
+	  grid-auto-rows: 100px;
+	  place-items: start stretch;
+	  gap: 8px;
     padding: 16px;
     overflow-x: hidden;
     overflow-y: auto;
@@ -148,10 +162,6 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-  }
-
-  .file:not(:last-of-type) {
-    margin-right: 8px;
   }
 
   .file:hover {
@@ -209,7 +219,6 @@
     width: 100%;
     height: 100%;
     min-height: 100%;
-    max-width: 20vh;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -218,11 +227,13 @@
     user-select: none;
     color: #BDBDBD;
     padding: 16px;
+	  transition: 250ms all ease-out;
   }
 
   .empty-text {
     position: relative;
     width: 100%;
+	  height: auto;
     text-align: center;
     font-size: 1.2em;
   }
