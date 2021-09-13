@@ -66,7 +66,7 @@
 			z-index: 2;
 			transform: scale(1);
 		}
-		80% {
+		40% {
       z-index: 100;
       transform: scale(1.5);
 		}
@@ -78,9 +78,15 @@
 
 	rect {
 		animation-name: sample;
-		animation-duration: 350ms;
+		animation-duration: 500ms;
 		transform-origin: center;
 		transition-timing-function: ease-out;
 		z-index: 1;
+	}
+
+	svg {
+		position: relative;
+		width: 100%;
+		height: 100%;
 	}
 </style>
