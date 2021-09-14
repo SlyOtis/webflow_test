@@ -66,6 +66,4 @@
 	  bottom: 0;
 	  transition: 250ms all ease-out;
   }
-
-
 </style>
