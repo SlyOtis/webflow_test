@@ -1,9 +1,12 @@
 import type { WaveformData } from "waveform-data";
 
-export type InputFileLoading = {
-  message?: string
-  progress?: number
-  createdAt: Date
+export type ProgressInfo = FileProgressInfo & {
+  total: number
+  index: number
+}
+
+export type FileProgressInfo = {
+  progress: number
 }
 
 export type InputFile = {
@@ -11,7 +14,7 @@ export type InputFile = {
   name: string
   file: File
   data?: WaveformData
-  upload?: InputFileLoading
-  processing?: InputFileLoading
+  upload?: FileProgressInfo
+  processing?: FileProgressInfo
 }
 

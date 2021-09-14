@@ -1,21 +1,76 @@
 <script lang="ts">
-  import {InputFile} from "../lib/utils";
+  import type {InputFile, ProgressInfo} from "../lib/utils";
+  import ProgressBar from "./ProgressBar.svelte";
 
-  export let files: Array<InputFile>
+  export let files: Array<InputFile> = []
 
+  //TODO:: Do this on add or update ?
+  const processFiles = (input: Array<InputFile>) => {
+    const info = input.reduce((prev, curr) => {
+      const upload = curr?.upload?.progress || 0
+      const processing = curr?.processing?.progress || 0
+
+      return {
+        uploads: {
+          ...prev.uploads,
+          total: prev.uploads.total + 1,
+          ...upload >= 1 && {
+            index: prev.uploads.index + 1
+          },
+          progress: prev.uploads.progress + upload
+        },
+        processing: {
+          ...prev.processing,
+          total: prev.processing.total + 1,
+          ...processing >= 1 && {
+            index: prev.processing.index + 1
+          },
+          progress: prev.processing.progress + processing
+        }
+      }
+    }, {
+      uploads: {
+        total: 0,
+        index: 0,
+        progress: 0
+      },
+      processing: {
+        total: 0,
+        index: 0,
+        progress: 0
+      }
+    })
+
+    info.processing.progress = info.processing.progress / info.processing.total
+    info.uploads.progress = info.uploads.progress / info.uploads.total
+    return info
+  }
+
+  $: info = processFiles(files)
 
 </script>
 
 {#if files?.length}
-	<div class="root">
-
+	<div class="root card-background">
+		<ProgressBar title="Uploading" info={info.uploads} />
+		<ProgressBar title="Processing" info={info.processing} />
 	</div>
 {/if}
 
 <style>
-	.root {
-
-	}
+  .root {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+    border-radius: 8px;
+    transition: 350ms all ease-out;
+	  margin-top: 32px;
+	  padding: 8px 16px;
+  }
 </style>
 
 

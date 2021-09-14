@@ -14,6 +14,11 @@
 
   const audioContext = new AudioContext();
 
+  function updateData(input: InputFile) {
+    files[files.findIndex(val => val.id === input.id)] = input
+    files = files
+  }
+
 
   function generateWave(inn: InputFile) {
     inn.file.arrayBuffer().then(buffer => {
@@ -23,6 +28,13 @@
         array_buffer: buffer,
         scale: 128,
       };
+
+      updateData({
+        ...inn,
+        processing: {
+          progress: 0.5
+        }
+      })
 
       return new Promise((resolve, reject) => {
         WaveformData.createFromAudio(options, (err, waveform) => {
@@ -34,9 +46,13 @@
         });
       });
     }).then((res: WaveformData) => {
-      inn.data = res as any
-      files[files.findIndex(val => val.id === inn.id)] = inn
-      files = files
+      updateData({
+        ...inn,
+        data: res as any,
+        processing: {
+          progress: 1
+        }
+      })
     })
   }
 

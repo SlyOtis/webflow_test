@@ -140,6 +140,20 @@
     z-index: 1;
   }
 
+
+  .root {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: column;
+    border-radius: 8px;
+    transition: 350ms all ease-out;
+  }
+
+
   .inner {
     position: relative;
     text-align: center;
@@ -186,18 +200,6 @@
 
   input {
     display: none;
-  }
-
-  .root {
-    position: relative;
-    display: flex;
-    width: 100%;
-    height: 100%;
-    justify-content: space-between;
-    align-items: center;
-    flex-direction: column;
-    border-radius: 8px;
-    transition: 350ms all ease-out;
   }
 
   button {
