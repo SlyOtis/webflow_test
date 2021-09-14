@@ -5,30 +5,45 @@
   export let samplesPP = 128
   export let blockSize = 2
   export let maxY = 100
+  export let maxX = 300
   export let sampleWidth = 2
   export let sampleGap = 1
-  export let samples: Array<{top: number, bottom: number}> = []
+  export let samples: Array<{ top: number, bottom: number }> = []
   export let color: String = "#"
 
   const scaleY = (amplitude, height) => {
     const range = 256;
     const offset = 128;
 
-    const val =  ((Math.abs(amplitude) + offset) * height) / range;
-	  const t = (amplitude + offset) / range
+    const val = ((Math.abs(amplitude) + offset) * height) / range;
+    const t = (amplitude + offset) / range
 
-	  return val
+    return val
   }
 
   const mapSamples = (data: WaveformData) => {
     const channel = data.channel(0)
-	  let _samples = []
-    for (let x = 0; x < data.length; x++) {
-	    const sample = {
-        top: scaleY(channel.max_sample(x), maxY),
-        bottom: scaleY(channel.min_sample(x), maxY)
+    let _samples = []
+    let spp = Math.max(Math.ceil(data.length / maxX), 1)
+
+    for (let x = 0; x < data.length; x += spp) {
+      let sample = null
+	    let count = 0
+
+      for (let i = x; i < x + spp && i < data.length; i++) {
+        sample = {
+          top: (sample?.top || 0) + scaleY(channel.max_sample(x), maxY),
+          bottom: (sample?.bottom || 0) + scaleY(channel.min_sample(x), maxY)
+        }
+        count++
       }
-      _samples.push(sample);
+
+      sample = {
+        top: sample.top / count,
+	      bottom: sample.bottom / count
+      }
+
+      _samples.push(sample)
     }
 
     return _samples
@@ -45,48 +60,48 @@
 			height="100%"
 	>
 		{#each samples as {top, bottom}, i}
-				<rect
-						fill={color}
-						x={i * (sampleWidth + sampleGap)}
-						y={maxY - top}
-						width={sampleWidth}
-						height="{Math.abs(top) + Math.abs(bottom)}"
-						style={`
+			<rect
+					fill={color}
+					x={i * (sampleWidth + sampleGap)}
+					y={maxY - top}
+					width={sampleWidth}
+					height="{Math.abs(top) + Math.abs(bottom)}"
+					style={`
 							animation-delay: ${i * 2}ms;
 							transform-origin: ${i * (sampleWidth + sampleGap)}px center;
 						`}
-				/>
+			/>
 		{/each}
 	</svg>
 {/if}
 
 <style>
-	@keyframes sample {
-		0% {
-			z-index: 2;
-			transform: scale(1);
-		}
-		40% {
+  @keyframes sample {
+    0% {
+      z-index: 2;
+      transform: scale(1);
+    }
+    40% {
       z-index: 100;
       transform: scale(1.5);
-		}
+    }
     100% {
       z-index: 1;
       transform: scale(1);
     }
   }
 
-	rect {
-		animation-name: sample;
-		animation-duration: 500ms;
-		transform-origin: center;
-		transition-timing-function: ease-out;
-		z-index: 1;
-	}
+  rect {
+    animation-name: sample;
+    animation-duration: 500ms;
+    transform-origin: center;
+    transition-timing-function: ease-out;
+    z-index: 1;
+  }
 
-	svg {
-		position: relative;
-		width: 100%;
-		height: 100%;
-	}
+  svg {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
 </style>
