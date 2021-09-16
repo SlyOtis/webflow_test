@@ -3,11 +3,11 @@
   import {InputFile} from "../lib/utils";
   import {v4 as uuid} from 'uuid'
   import IconBreasts from "../icons/IconBreasts.svelte";
+  import fileStore from "../lib/stores";
 
   const dispatch = createEventDispatcher()
 
   let input: HTMLInputElement
-  export let files: Array<InputFile> = []
   let invalidFile = false, dragOver = false
 
   function updateFiles(file: File): boolean {
@@ -22,8 +22,10 @@
       file
     }
 
-    files.push(inputFile)
-    files = files
+    fileStore.update(state => ({
+	    ...state,
+	    [inputFile.id]: inputFile
+    }))
     dispatch('input', inputFile)
   }
 
@@ -34,8 +36,6 @@
 
     input.value = null
     input.files = null
-
-    files = files
   }
 
   function eachTransferFile(e, callback?: (file: File) => void): Array<File> {
@@ -85,14 +85,12 @@
     input.value = null
     input.files = null
 
-    files = files
 	  return true
   }
 
   function dragCancel() {
     invalidFile = false
     dragOver = false
-
     console.log('cancel')
   }
 
@@ -109,12 +107,12 @@
 		     on:drop={onDrop}
 		     on:dragleave={dragCancel}
 		>
-			<p class:display={invalidFile}>NO!</p>
+			<p class:display={invalidFile}>Audio files you idiot!</p>
 		</div>
 		<div class="inner" class:invalid-file={invalidFile}>
-			<slot {files}/>
+			<slot/>
 		</div>
-		<button on:click|preventDefault|stopPropagation={ () => input.click()}>
+		<button on:click|preventDefault|stopPropagation={() => input.click()}>
 			<IconBreasts/>
 			<!--			<span>Upload Songs</span>-->
 		</button>
@@ -140,7 +138,6 @@
     z-index: 1;
   }
 
-
   .root {
     position: relative;
     display: flex;
@@ -152,7 +149,6 @@
     border-radius: 8px;
     transition: 350ms all ease-out;
   }
-
 
   .inner {
     position: relative;

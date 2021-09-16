@@ -70,6 +70,7 @@
     transition: 350ms all ease-out;
 	  margin-top: 32px;
 	  padding: 8px 16px;
+	  min-width: 20vw;
   }
 </style>
 

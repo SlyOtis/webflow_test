@@ -27,8 +27,8 @@
 	<div class="empty">
 		<span class="empty-text">Flick the tits to upload songs.</span>
 		<span class="icon">
-					<IconDownRight/>
-				</span>
+			<IconDownRight/>
+		</span>
 	</div>
 {:else}
 	<div class="files" style="grid-template-columns: {gridTemplateColumns};">
@@ -74,7 +74,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-	  user-select: none;
+    user-select: none;
 
   }
 

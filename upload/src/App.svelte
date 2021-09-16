@@ -8,17 +8,10 @@
   import {onMount} from "svelte";
   import UploadInfo from "./components/UploadInfo.svelte";
   import FilesList from "./components/FilesList.svelte";
+  import {fileStore} from "lib/stores"
 
-  let files: Array<InputFile>
   let ready = false
-
   const audioContext = new AudioContext();
-
-  function updateData(input: InputFile) {
-    files[files.findIndex(val => val.id === input.id)] = input
-    files = files
-  }
-
 
   function generateWave(inn: InputFile) {
     inn.file.arrayBuffer().then(buffer => {
@@ -29,12 +22,15 @@
         scale: 128,
       };
 
-      updateData({
-        ...inn,
-        processing: {
-          progress: 0.5
+      fileStore.update(state => ({
+        ...state,
+        [inn.id]: {
+          ...inn,
+          processing: {
+            progress: 0.5
+          }
         }
-      })
+      }))
 
       return new Promise((resolve, reject) => {
         WaveformData.createFromAudio(options, (err, waveform) => {
@@ -46,13 +42,16 @@
         });
       });
     }).then((res: WaveformData) => {
-      updateData({
-        ...inn,
-        data: res as any,
-        processing: {
-          progress: 1
+      fileStore.update(state => ({
+        ...state,
+        [inn.id]: {
+          ...inn,
+	        data: res as any,
+          processing: {
+            progress: 1
+          }
         }
-      })
+      }))
     })
   }
 
@@ -99,7 +98,7 @@
     z-index: 1;
 	  max-width: 80vw;
 	  max-height: 80vh;
-	  min-width: 116px;
-	  min-height: 116px;
+	  min-width: 132px;
+	  min-height: 132px;
   }
 </style>
