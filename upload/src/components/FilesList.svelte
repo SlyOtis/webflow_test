@@ -5,8 +5,10 @@
   import {fly} from "svelte/transition";
   import Waveform from "./Waveform.svelte";
   import IconAudio from "../icons/IconAudio.svelte";
+  import fileStore from "../lib/stores";
 
   export let files: Array<InputFile> = []
+  $: files = Object.keys($fileStore).map(key => $fileStore[key])
 
   let gridTemplateColumns = 'unset'
 
@@ -20,7 +22,7 @@
   })
 </script>
 
-<svelte:window on:resize={calculateColumns}/>
+<svelte:window on:resize={calculateColumns} />
 
 
 {#if files.length <= 0}

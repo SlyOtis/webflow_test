@@ -1,8 +1,10 @@
 <script lang="ts">
   import type {InputFile, ProgressInfo} from "../lib/utils";
   import ProgressBar from "./ProgressBar.svelte";
+  import fileStore from "../lib/stores";
 
-  export let files: Array<InputFile> = []
+  export let files: Array<InputFile>
+  $: files = Object.keys($fileStore).map(key => $fileStore[key])
 
   //TODO:: Do this on add or update ?
   const processFiles = (input: Array<InputFile>) => {

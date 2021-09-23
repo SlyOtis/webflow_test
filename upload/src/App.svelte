@@ -8,45 +8,59 @@
   import {onMount} from "svelte";
   import UploadInfo from "./components/UploadInfo.svelte";
   import FilesList from "./components/FilesList.svelte";
-  import {fileStore} from "lib/stores"
+  import {fileStore} from "./lib/stores"
+  import {Subject} from "rxjs"
+  import {mergeWith, buffer} from "rxjs/operators"
+
 
   let ready = false
   const audioContext = new AudioContext();
 
-  function generateWave(inn: InputFile) {
-    inn.file.arrayBuffer().then(buffer => {
+  const processor = new Subject<InputFile>()
 
-      const options = {
-        audio_context: audioContext,
-        array_buffer: buffer,
-        scale: 128,
-      };
+  let count = 0
 
-      fileStore.update(state => ({
-        ...state,
-        [inn.id]: {
-          ...inn,
-          processing: {
-            progress: 0.5
-          }
+  processor.pipe(
+	  mergeWith(generateWave),
+  ).subscribe()
+
+  async function generateWave(inn: InputFile) {
+
+    count++
+	  console.log("count is " + count)
+
+    const buffer = await inn.file.arrayBuffer()
+
+    const options = {
+      audio_context: audioContext,
+      array_buffer: buffer,
+      scale: 128,
+    };
+
+    fileStore.update(state => ({
+      ...state,
+      [inn.id]: {
+        ...inn,
+        processing: {
+          progress: 0.5
         }
-      }))
+      }
+    }))
 
-      return new Promise((resolve, reject) => {
-        WaveformData.createFromAudio(options, (err, waveform) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(waveform);
-          }
-        });
-      });
-    }).then((res: WaveformData) => {
+	  return await new Promise((resolve, reject) => {
+      WaveformData.createFromAudio(options, (err, waveform) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(waveform);
+        }
+      })
+	  }).then((res: WaveformData) => {
       fileStore.update(state => ({
         ...state,
         [inn.id]: {
           ...inn,
-	        data: res as any,
+          data: res as any,
           processing: {
             progress: 1
           }
@@ -56,7 +70,7 @@
   }
 
   function onInput({detail}: { detail: InputFile }) {
-    generateWave(detail)
+    processor.next(detail)
   }
 
   onMount(() => {
@@ -65,6 +79,7 @@
       .then(res => {
         ready = true
       })
+
   })
 
 </script>
@@ -74,15 +89,10 @@
 
 {#if ready}
 	<main transition:fly={{delay: 350, y: 200, opacity: 0}}>
-		<FileUpload
-				on:input={onInput}
-				bind:files
-		>
-			<FilesList bind:files/>
+		<FileUpload on:input={onInput}>
+			<FilesList/>
 		</FileUpload>
-		<UploadInfo
-				bind:files
-		/>
+		<UploadInfo/>
 	</main>
 {/if}
 
@@ -96,9 +106,9 @@
     align-items: center;
     flex-direction: column;
     z-index: 1;
-	  max-width: 80vw;
-	  max-height: 80vh;
-	  min-width: 132px;
-	  min-height: 132px;
+    max-width: 80vw;
+    max-height: 80vh;
+    min-width: 132px;
+    min-height: 132px;
   }
 </style>

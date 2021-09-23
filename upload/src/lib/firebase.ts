@@ -1,5 +1,6 @@
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 import { initializeApp } from "firebase/app";
+import { getDatabase } from "firebase/database"
 
 const firebaseConfig = {
   apiKey: "AIzaSyAWkPxsbuKqPROEZ1tmmG2ZlvhpgfZIKT8",
@@ -13,6 +14,9 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app)
+export const database = getDatabase()
+
+
 
 
 //TODO:: This should validate hashes at both ends
