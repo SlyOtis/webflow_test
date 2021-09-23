@@ -16,5 +16,7 @@ export type InputFile = {
   data?: WaveformData
   upload?: FileProgressInfo
   processing?: FileProgressInfo
+  audioUrl?: String
+  waveUrl?: String
 }
 

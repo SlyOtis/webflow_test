@@ -9,20 +9,18 @@
   import UploadInfo from "./components/UploadInfo.svelte";
   import FilesList from "./components/FilesList.svelte";
   import {fileStore} from "./lib/stores"
-  import {Subject} from "rxjs"
-  import {mergeWith, buffer} from "rxjs/operators"
+	import {storage} from "./lib/firebase";
+  import {ref, uploadBytesResumable, getDownloadURL} from "firebase/storage"
 
 
-  let ready = false
+	let ready = false
   const audioContext = new AudioContext();
 
-  const processor = new Subject<InputFile>()
+	const toProcess: Array<InputFile> = []
+	const toUpload: Array<InputFile> = []
 
   let count = 0
-
-  processor.pipe(
-	  mergeWith(generateWave),
-  ).subscribe()
+	let isProcessing = false
 
   async function generateWave(inn: InputFile) {
 
@@ -69,9 +67,80 @@
     })
   }
 
+  async function uploadFile(inn: InputFile) {
+		// Create a reference to 'mountains.jpg'
+		await new Promise((resolve, reject) => {
+
+			const names = inn.file.name.split(".")
+			const ext = names[names.length - 1]
+			const fileRef = ref(storage, inn.id + "/" + "audio." + ext);
+
+			const uploadTask = uploadBytesResumable(fileRef, inn.file);
+
+		// Listen for state changes, errors, and completion of the upload.
+			uploadTask.on('state_changed',
+					(snapshot) => {
+						// Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+						const progress = (snapshot.bytesTransferred / snapshot.totalBytes);
+
+						fileStore.update(state => ({
+							...state,
+							[inn.id]: {
+								...state[inn.id],
+								upload: {
+									...inn.upload,
+									progress
+								}
+							}
+						}))
+					},
+					reject,
+					() => {
+						getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+							inn.audioUrl = downloadURL
+
+							fileStore.update(state => ({
+								...state,
+								[inn.id]: {
+									...inn,
+									...state[inn.id]
+								}
+							}))
+
+							resolve(inn)
+
+						}).catch(reject);
+					}
+			);
+		})
+
+
+	}
+
   function onInput({detail}: { detail: InputFile }) {
-    processor.next(detail)
+		toProcess.push(detail)
+
+		uploadFile(detail)
+
+		if (isProcessing) return
+		const first = toProcess.shift()
+		if (!first) return
+		isProcessing = true
+		processFileInput(first)
   }
+
+  async function processFileInput(inn: InputFile) {
+		await generateWave(inn)
+		toUpload.push(inn)
+
+		await new Promise(resolve => setTimeout(() => resolve(), 200))
+		const next = toProcess.shift()
+		if (next) {
+			return await processFileInput(next)
+		} else {
+			isProcessing = false
+		}
+	}
 
   onMount(() => {
     ready = false

@@ -13,11 +13,8 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const storage = getStorage(app)
+export const storage = getStorage(app)
 export const database = getDatabase()
-
-
-
 
 //TODO:: This should validate hashes at both ends
 
