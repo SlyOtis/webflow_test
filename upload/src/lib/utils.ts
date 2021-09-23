@@ -18,5 +18,6 @@ export type InputFile = {
   processing?: FileProgressInfo
   audioUrl?: String
   waveUrl?: String
+  refId?: String
 }
 

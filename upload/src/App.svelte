@@ -17,15 +17,9 @@
   const audioContext = new AudioContext();
 
 	const toProcess: Array<InputFile> = []
-	const toUpload: Array<InputFile> = []
-
-  let count = 0
 	let isProcessing = false
 
   async function generateWave(inn: InputFile) {
-
-    count++
-	  console.log("count is " + count)
 
     const buffer = await inn.file.arrayBuffer()
 
@@ -131,8 +125,6 @@
 
   async function processFileInput(inn: InputFile) {
 		await generateWave(inn)
-		toUpload.push(inn)
-
 		await new Promise(resolve => setTimeout(() => resolve(), 200))
 		const next = toProcess.shift()
 		if (next) {

@@ -28,9 +28,21 @@
             index: prev.processing.index + 1
           },
           progress: prev.processing.progress + processing
-        }
+        },
+				associated: {
+        	...prev.associated,
+					total: prev.associated.total + 1,
+					...curr.refId && {
+        		index: prev.associated.index + 1
+					}
+				}
       }
     }, {
+    	associated: {
+    		total: 0,
+				index: 0,
+				progress: 0
+			},
       uploads: {
         total: 0,
         index: 0,
@@ -45,6 +57,7 @@
 
     info.processing.progress = info.processing.progress / info.processing.total
     info.uploads.progress = info.uploads.progress / info.uploads.total
+    info.associated.progress = info.associated.index / info.associated.total
     return info
   }
 
@@ -56,6 +69,7 @@
 	<div class="root card-background">
 		<ProgressBar title="Uploading" info={info.uploads} />
 		<ProgressBar title="Processing" info={info.processing} />
+		<ProgressBar title="Associated" info={info.associated} />
 	</div>
 {/if}
 
