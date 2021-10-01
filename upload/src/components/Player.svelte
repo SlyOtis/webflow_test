@@ -55,6 +55,17 @@
     }
   }
 
+  console.log(src.waveUrl)
+
+  const getWaveSvg = () => fetch(src.waveUrl, {
+    method: 'GET',
+    mode: 'no-cors',
+  }).then(res => res.ok)
+  .then(res => {
+    console.log(res)
+	  return res
+  })
+
 </script>
 
 <div class="root">
@@ -87,16 +98,18 @@
 				</div>
 			</div>
 		{:else if !useFile }
-			<div class="waveform-wrapper overlay" style="right: {(100 - progress)}%;">
-				<div class="waveform" style="width: {width}px;">
-				<embed width="100%" src={src.waveUrl} type="image/svg+xml" />
+			{#await getWaveSvg() then resp}
+				<div class="waveform-wrapper overlay" style="right: {(100 - progress)}%;">
+					<div class="waveform" style="width: {width}px;">
+						{@html resp}
+					</div>
 				</div>
-			</div>
-			<div class="waveform-wrapper" style="left: {progress}%;">
-				<div class="waveform" style="width: {width}px;">
-					<embed width="100%" src={src.waveUrl} type="image/svg+xml" />
+				<div class="waveform-wrapper" style="left: {progress}%;">
+					<div class="waveform" style="width: {width}px;">
+						{@html resp}
+					</div>
 				</div>
-			</div>
+			{/await}
 		{:else }
 			<IconAudio/>
 		{/if}
