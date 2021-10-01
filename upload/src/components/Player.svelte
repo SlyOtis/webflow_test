@@ -14,6 +14,8 @@
   let canPlay: boolean = false
   let progress: number = 0
   let playback: any
+  let useFile: boolean = !!src.file
+  let _src: string =  useFile ? URL.createObjectURL(src.file) : src.audioUrl
 
   function stopPlayback() {
     clearTimeout(playback)
@@ -23,8 +25,8 @@
 
   function startPlayback() {
     clearTimeout(playback)
-	  progress = (player?.currentTime || 0)
-	  const dur = (player?.duration || 0.1)
+    progress = (player?.currentTime || 0)
+    const dur = (player?.duration || 0.1)
     playback = setInterval(() => {
       progress = (player.currentTime / dur) * 100
     }, updateRate)
@@ -36,22 +38,21 @@
     if (playing) {
       stopPlayback()
       player.pause()
-    }
-    else {
+    } else {
       player.play()
-	    startPlayback()
+      startPlayback()
     }
   }
 
   function onPlaying(e) {
-	  switch (e.type) {
-	    case 'play':
-		  case 'playing':
-		    break
+    switch (e.type) {
+      case 'play':
+      case 'playing':
+        break
       default:
         stopPlayback()
-			  break
-	  }
+        break
+    }
   }
 
 </script>
@@ -65,8 +66,8 @@
 		{/if}
 	</div>
 
-	{#if src.data}
-		<div class="waveform-container" style="width: {width}px">
+	<div class="waveform-container" style="width: {width}px">
+		{#if src.data}
 			<div class="waveform-wrapper overlay" style="right: {(100 - progress)}%;">
 				<div class="waveform" style="width: {width}px;">
 					<Waveform
@@ -85,14 +86,13 @@
 					/>
 				</div>
 			</div>
-		</div>
-	{:else }
-		<IconAudio/>
-	{/if}
+		{:else }
+			<IconAudio/>
+		{/if}
+	</div>
 
 	<audio
 			bind:this={player}
-			onload=""
 			on:canplay={() => canPlay = true}
 			on:error={() => canPlay = false}
 			on:playing={onPlaying}
@@ -101,7 +101,7 @@
 			on:abort={onPlaying}
 			on:ended={onPlaying}
 	>
-		<source src={URL.createObjectURL(src.file)} type="audio/wav">
+		<source src={_src} type="audio/wav">
 	</audio>
 </div>
 
@@ -177,12 +177,12 @@
   }
 
   .waveform-wrapper {
-	  position: absolute;
-	  overflow: hidden;
-	  top: 0;
-	  left: 0;
-	  right: 0;
-	  bottom: 0;
+    position: absolute;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     will-change: right, left;
   }
 

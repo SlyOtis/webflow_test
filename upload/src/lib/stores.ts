@@ -8,7 +8,6 @@ import {
   onChildRemoved,
 } from 'firebase/database'
 import {database} from "./firebase";
-import parseISO from 'date-fns/parseISO'
 
 export type FileStore = {[key: string]: InputFile}
 export const fileStore = writable<FileStore>({})
@@ -74,6 +73,17 @@ export async function updateFileInput(inn: InputFile) {
   await set(fileRef, {
     ...rest,
     createdAt: createdAt.toISOString()
+  })
+
+  return fileRef
+}
+
+export async function setAssociation(inn: InputFile) {
+  const fileRef = ref(database, 'refs/' + inn.refId)
+
+  await set(fileRef, {
+    fileId: inn.id,
+    createdAt: (new Date()).toISOString()
   })
 
   return fileRef

@@ -1,7 +1,7 @@
 <script lang="ts">
   import type {InputFile} from "../lib/utils";
   import ProgressBar from "./ProgressBar.svelte";
-  import fileStore, {updateFileInput} from "../lib/stores";
+  import fileStore, {setAssociation, updateFileInput} from "../lib/stores";
   import {clearEditFile, editFile, setEditFile} from "../lib/associate";
   import Player from "./Player.svelte";
   import compareDesc from "date-fns/compareDesc";
@@ -87,6 +87,7 @@
       })
 
 	    updateFileInput(file)
+      setAssociation(file)
 
       const nextFile = files.find(value => value.id !== file.id && !value.refId)
       if (nextFile) {

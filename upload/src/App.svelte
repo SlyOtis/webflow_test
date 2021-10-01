@@ -2,10 +2,12 @@
   import Loading from "./components/Loading.svelte";
   import Player from './Player.svelte'
 
+  const upload = location.pathname.startsWith("/upload")
+  console.log(upload)
 
 </script>
 
-{#if location.pathname.startsWith("/upload")}
+{#if upload}
 	{#await import("./Upload.svelte")}
 		<Loading />
 	{:then Upload}
