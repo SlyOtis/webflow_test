@@ -25,31 +25,33 @@ export type QueueProcess<T> = (next: T) => (Promise<T> | Promise<void>)
 
 export class HandlerQueue<T> {
   protected buffer: Array<T> = []
-  protected _isRunning: boolean = false
+  protected running: number = 0
   protected process: QueueProcess<T>
   protected kill: boolean = false
+  protected inParallel: number = 1
 
   delay: number = 200
 
-  constructor(process: QueueProcess<T>, delay: number = 0) {
+  constructor(process: QueueProcess<T>, delay: number = 0, inParallel: number = 1) {
     this.delay = delay
     this.process = process
+    this.inParallel = inParallel
   }
 
-  get isAlive(): boolean {
+  isAlive(): boolean {
     return !this.kill
   }
 
-  get isRunning(): boolean {
-    return this._isRunning
+  isRunning(): boolean {
+    return this.running > 0
   }
 
   post(next: T) {
     this.buffer.push(next)
-    if (this._isRunning) return
+    if (this.running >= this.inParallel) return
     const first = this.buffer.shift()
     if (!first) return
-    this._isRunning = true
+    this.running++
     this.tryNext(next)
   }
 
@@ -65,7 +67,7 @@ export class HandlerQueue<T> {
     if (next) {
       return await this.tryNext(next)
     } else {
-      this._isRunning = false
+      this.running--
     }
   }
 
