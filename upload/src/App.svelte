@@ -6,7 +6,7 @@
   import LogoHerro from "./components/LogoHerro.svelte";
   import {fly} from "svelte/transition";
   import {onMount} from "svelte";
-  import UploadInfo from "./components/UploadInfo.svelte";
+  import BottomBar from "./components/BottomBar.svelte";
   import FilesList from "./components/FilesList.svelte";
   import {fileStore} from "./lib/stores"
 	import {storage} from "./lib/firebase";
@@ -141,7 +141,7 @@
 		<FileUpload on:input={onInput}>
 			<FilesList/>
 		</FileUpload>
-		<UploadInfo/>
+		<BottomBar/>
 	</main>
 {/if}
 

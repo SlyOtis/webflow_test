@@ -16,9 +16,10 @@
       return false
     }
 
-    const inputFile = {
+    const inputFile: InputFile = {
       id: uuid().toString(),
       name: file.name,
+	    createdAt: new Date(),
       file
     }
 

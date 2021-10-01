@@ -12,6 +12,7 @@ export type FileProgressInfo = {
 export type InputFile = {
   id: string
   name: string
+  createdAt: Date
   file: File
   data?: WaveformData
   upload?: FileProgressInfo

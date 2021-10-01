@@ -2,13 +2,18 @@
   import {InputFile} from "../lib/utils";
   import IconDownRight from "../icons/IconDownRight.svelte";
   import {beforeUpdate} from "svelte";
-  import {fly} from "svelte/transition";
+  import {fly, fade} from "svelte/transition";
   import Waveform from "./Waveform.svelte";
   import IconAudio from "../icons/IconAudio.svelte";
   import fileStore from "../lib/stores";
+  import IconInfo from "../icons/IconInfo.svelte";
+  import {setEditFile} from "../lib/associate";
+  import compareDesc from "date-fns/compareDesc";
 
   export let files: Array<InputFile> = []
-  $: files = Object.keys($fileStore).map(key => $fileStore[key])
+  $: files = Object.keys($fileStore)
+	  .map(key => $fileStore[key] as InputFile)
+    .sort((a, b) => compareDesc(a.createdAt, b.createdAt))
 
   let gridTemplateColumns = 'unset'
 
@@ -20,9 +25,10 @@
   beforeUpdate(() => {
     calculateColumns()
   })
+
 </script>
 
-<svelte:window on:resize={calculateColumns} />
+<svelte:window on:resize={calculateColumns}/>
 
 
 {#if files.length <= 0}
@@ -41,6 +47,17 @@
 				{:else}
 					<IconAudio/>
 				{/if}
+				{#if !file.refId}
+					<div
+							class="associate"
+							on:click|preventDefault|stopPropagation={() => setEditFile(file)}
+							transition:fade
+					>
+						<div class="associate-icon">
+							<IconInfo/>
+						</div>
+					</div>
+				{/if}
 				<span>{file.name}</span>
 			</div>
 		{/each}
@@ -48,6 +65,39 @@
 {/if}
 
 <style>
+
+	:root {
+    --icon-size: 16px
+  }
+
+	.associate {
+		position: absolute;
+		z-index: 10;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		display: flex;
+		border: 2px solid #d03939;
+		border-radius: 8px;
+	}
+
+	.associate-icon {
+    position: absolute;
+		top: calc(var(--icon-size) / -2);
+		right: calc(var(--icon-size) / -2);
+		width: var(--icon-size);
+		height: var(--icon-size);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		border-radius: 50%;
+		background-color: #d03939;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+		fill: white;
+		color: white;
+		padding: 2px;
+	}
 
   .files {
     position: relative;
@@ -77,7 +127,6 @@
     justify-content: center;
     align-items: center;
     user-select: none;
-
   }
 
   .file:hover {
