@@ -9,7 +9,7 @@
   import BottomBar from "./components/BottomBar.svelte";
   import FilesList from "./components/FilesList.svelte";
   import {fileStore} from "./lib/stores"
-	import {storage} from "./lib/firebase";
+  import {storage, updateFileInput} from "./lib/firebase";
   import {ref, uploadBytesResumable, getDownloadURL} from "firebase/storage"
   import {HandlerQueue} from "./lib/utils";
 
@@ -19,7 +19,6 @@
 
   const uploadHandler = new HandlerQueue<InputFile>(uploadFile)
   const processHandler = new HandlerQueue<InputFile>(generateWave)
-
 
   async function generateWave(inn: InputFile) {
 
@@ -36,7 +35,7 @@
       [inn.id]: {
         ...state[inn.id],
         processing: {
-          progress: 0.5
+          progress: 0.25
         }
       }
     }))

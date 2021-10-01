@@ -170,6 +170,7 @@
   .editing {
     flex-direction: row;
     background-color: var(--background);
+	  justify-content: center;
   }
 
   form {
@@ -198,7 +199,7 @@
     border: 1px solid #3b3b3b;
     background-color: var(--selected);
     transition: 350ms all ease-out;
-    padding: 4px 8px;
+    padding: 4px 12px;
     color: white;
     font-size: 1em;
     max-width: 250px;
@@ -209,7 +210,7 @@
     padding: 0;
     top: 0;
     left: 0;
-    margin: 4px 0 0 8px;
+    margin: 4px 0 0 12px;
     font-size: 1em;
     will-change: font-size, margin, opacity, background-color;
     transition: 250ms all ease-out;
@@ -217,20 +218,22 @@
     z-index: 2;
     opacity: 0.65;
     background-color: var(--selected);
+	  user-select: none;
+	  pointer-events: none;
   }
 
-  input:focus + label, input:hover + label, input:active + label {
+  input:focus + label, input:active + label {
     background-color: var(--background);
-    margin: -0.5em 0 0 8px;
+    margin: -0.6em 0 0 16px;
     opacity: 1;
-    font-size: 0.6em;
+    font-size: 0.7em;
   }
 
   input:not(:placeholder-shown) ~ label {
     background-color: var(--background);
-    margin: -0.5em 0 0 8px;
+    margin: -0.6em 0 0 16px;
     opacity: 1;
-    font-size: 0.6em;
+    font-size: 0.7em;
   }
 
   input:focus, input:hover, input:active {
@@ -239,6 +242,7 @@
 
   p {
 	  font-size: 0.8em;
+	  user-select: none;
   }
 
   button {
@@ -296,6 +300,7 @@
 	  padding: 0;
 	  text-align: start;
 	  width: auto;
+	  user-select: none;
   }
 
 </style>

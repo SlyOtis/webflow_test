@@ -9,7 +9,12 @@
   export let sampleWidth = 2
   export let sampleGap = 1
   export let samples: Array<{ top: number, bottom: number }> = []
-  export let color: String = "#"
+  export let color: string = "#"
+  export let noAnimation = false
+  export let id: string = null
+
+  let className: string = null
+  export {className as class}
 
   const scaleY = (amplitude, height) => {
     const range = 256;
@@ -55,13 +60,15 @@
 
 {#if samples.length > 0}
 	<svg
+			{id}
+			class="waveform {className}"
 			viewBox="0 0 {samples.length * (sampleGap + sampleWidth)} {maxY * 2}"
 			width="100%"
 			height="100%"
+			fill={color}
 	>
 		{#each samples as {top, bottom}, i}
 			<rect
-					fill={color}
 					x={i * (sampleWidth + sampleGap)}
 					y={maxY - top}
 					width={sampleWidth}
@@ -70,6 +77,7 @@
 							animation-delay: ${i * 2}ms;
 							transform-origin: ${i * (sampleWidth + sampleGap)}px center;
 						`}
+					class:animation={!noAnimation}
 			/>
 		{/each}
 	</svg>
@@ -91,11 +99,14 @@
     }
   }
 
-  rect {
+  .animation {
     animation-name: sample;
     animation-duration: 500ms;
     transform-origin: center;
     transition-timing-function: ease-out;
+  }
+
+  rect {
     z-index: 1;
   }
 
@@ -103,5 +114,8 @@
     position: relative;
     width: 100%;
     height: 100%;
+	  padding: 0;
+	  margin: 0;
+	  color: inherit;
   }
 </style>

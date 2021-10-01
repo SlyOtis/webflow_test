@@ -1,4 +1,4 @@
-import { getStorage, ref, uploadBytes } from "firebase/storage";
+import { getStorage } from "firebase/storage";
 import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database"
 
@@ -15,8 +15,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const storage = getStorage(app)
 export const database = getDatabase()
-
-//TODO:: This should validate hashes at both ends
 
 
 
