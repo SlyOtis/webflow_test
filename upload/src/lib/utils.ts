@@ -46,6 +46,10 @@ export class HandlerQueue<T> {
     return this.running > 0
   }
 
+  /**
+   * Posts the next item at the back of the queue
+   * @param next T the next value to process
+   */
   post(next: T) {
     this.buffer.push(next)
     if (this.running >= this.inParallel) return
