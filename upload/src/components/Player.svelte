@@ -23,7 +23,6 @@
 
   function onPlaying(e) {
     playing = !player.paused
-    console.log(e)
 
 	  if (e.type == 'ended') {
 	    player.currentTime = progress = 0
@@ -31,16 +30,10 @@
   }
 
   function onUpdate(e) {
-    console.log(e)
 	  if (e.type == "timeupdate" && player) {
       progress = player.currentTime
 	  }
   }
-
-  $: {
-    console.log(progress)
-  }
-
 </script>
 
 <div class="root">

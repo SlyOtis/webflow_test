@@ -56,8 +56,6 @@
 
     inn.waveUrl = waveUrl
 
-    console.log(waveUrl)
-
     fileStore.update(state => ({
       ...state,
       [inn.id]: {
