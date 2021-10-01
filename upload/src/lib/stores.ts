@@ -8,37 +8,55 @@ import {
   onChildRemoved,
 } from 'firebase/database'
 import {database} from "./firebase";
+import parseISO from 'date-fns/parseISO'
 
 export type FileStore = {[key: string]: InputFile}
 export const fileStore = writable<FileStore>({})
-const fileRef = ref(database, 'files')
+const filesRef = ref(database, 'files')
 
-onChildAdded(fileRef, (data) => {
-  fileStore.update(exist => ({
-    ...exist,
-    [data.key]: {
-      ...exist[data.key],
-      ...data.val()
-    }
-  }))
-})
-
-onChildChanged(fileRef, (data) => {
-  fileStore.update(exist => ({
-    ...exist,
-    [data.key]: {
-      ...exist[data.key],
-      ...data.val()
-    }
-  }))
-})
-
-onChildRemoved(fileRef, (data) => {
-  fileStore.update(exist => {
-    delete exist[data.key]
-    return exist
-  })
-})
+//
+// onChildAdded(fileRef, (data) => {
+//   fileStore.update(exist => {
+//
+//     const {
+//       createdAt,
+//       ...rest
+//     } = data.val()
+//
+//     return {
+//       ...exist,
+//       [data.key]: {
+//         ...exist[data.key],
+//         ...rest,
+//         createdAt: parseISO(createdAt)
+//       }
+//     }
+//   })
+// })
+//
+// onChildChanged(fileRef, (data) => {
+//   fileStore.update(exist => {
+//     const {
+//       createdAt,
+//       ...rest
+//     } = data.val()
+//
+//     return {
+//       ...exist,
+//       [data.key]: {
+//         ...exist[data.key],
+//         ...rest
+//       }
+//     }
+//   })
+// })
+//
+// onChildRemoved(fileRef, (data) => {
+//   fileStore.update(exist => {
+//     delete exist[data.key]
+//     return exist
+//   })
+// })
 
 export async function updateFileInput(inn: InputFile) {
   const fileRef = ref(database, 'files/' + inn.id)
@@ -49,10 +67,14 @@ export async function updateFileInput(inn: InputFile) {
     upload,
     data,
     svgEl,
+    createdAt,
     ...rest
   } = inn
 
-  await set(fileRef, rest)
+  await set(fileRef, {
+    ...rest,
+    createdAt: createdAt.toISOString()
+  })
 
   return fileRef
 }

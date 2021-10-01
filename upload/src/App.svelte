@@ -34,6 +34,8 @@
       el.removeAttribute('class')
     })
 
+	  inn.svgEl = svgEl
+
     fileStore.update(state => ({
       ...state,
       [inn.id]: {
@@ -56,20 +58,24 @@
 
     inn.waveUrl = waveUrl
 
-    fileStore.update(state => ({
-      ...state,
-      [inn.id]: {
+    fileStore.update(state => {
+      inn = {
         ...state[inn.id],
         waveUrl: waveUrl,
         processing: {
           progress: 1
         }
-      } as InputFile
-    }))
+      }
 
-    return updateFileInput(inn).then(() => inn).then(res => {
-      console.log('what')
+      return {
+        ...state,
+        [inn.id]: inn
+      }
     })
+
+	  await updateFileInput(inn)
+
+    return inn
   }
 
   async function generateWave(inn: InputFile) {
@@ -157,19 +163,22 @@
           getDownloadURL(uploadTask.snapshot.ref).then((audioUrl) => {
             inn.audioUrl = audioUrl
 
-            fileStore.update(state => ({
-              ...state,
-              [inn.id]: {
+            fileStore.update(state => {
+              inn = {
                 ...state[inn.id],
                 audioUrl: audioUrl,
                 upload: {
                   progress: 1
                 }
-              } as InputFile
-            }))
+              }
+
+              return {
+                ...state,
+                [inn.id]: inn
+              }
+            })
 
             return updateFileInput(inn).then(() => resolve(inn))
-
           }).catch(reject);
         }
       );
