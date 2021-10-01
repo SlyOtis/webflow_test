@@ -9,20 +9,27 @@ import {
 } from 'firebase/database'
 import {database} from "./firebase";
 
-export const fileStore = writable<{[key: string]: InputFile}>({})
+export type FileStore = {[key: string]: InputFile}
+export const fileStore = writable<FileStore>({})
 const fileRef = ref(database, 'files')
 
 onChildAdded(fileRef, (data) => {
   fileStore.update(exist => ({
     ...exist,
-    [data.key]: data.val()
+    [data.key]: {
+      ...exist[data.key],
+      ...data.val()
+    }
   }))
 })
 
 onChildChanged(fileRef, (data) => {
   fileStore.update(exist => ({
     ...exist,
-    [data.key]: data.val()
+    [data.key]: {
+      ...exist[data.key],
+      ...data.val()
+    }
   }))
 })
 
@@ -40,7 +47,8 @@ export async function updateFileInput(inn: InputFile) {
     file,
     processing,
     upload,
-    waveUrl, //TODO:: Already depricated ?
+    data,
+    svgEl,
     ...rest
   } = inn
 

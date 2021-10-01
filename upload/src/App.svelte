@@ -8,17 +8,71 @@
   import {onMount} from "svelte";
   import BottomBar from "./components/BottomBar.svelte";
   import FilesList from "./components/FilesList.svelte";
-  import {fileStore} from "./lib/stores"
-  import {storage, updateFileInput} from "./lib/firebase";
-  import {ref, uploadBytesResumable, getDownloadURL} from "firebase/storage"
+  import {fileStore, updateFileInput} from "./lib/stores"
+  import {storage} from "./lib/firebase";
+  import {ref, uploadBytesResumable, getDownloadURL, uploadBytes} from "firebase/storage"
   import {HandlerQueue} from "./lib/utils";
 
 
-	let ready = false
+  let ready = false
   const audioContext = new AudioContext();
 
   const uploadHandler = new HandlerQueue<InputFile>(uploadFile)
   const processHandler = new HandlerQueue<InputFile>(generateWave)
+
+  async function uploadSVG(inn: InputFile) {
+    const svgRef = ref(storage, inn.id + "/" + "waveform.svg");
+    const encoder = new TextEncoder()
+
+	  const svgEl = inn.svgEl
+    svgEl.removeAttribute('class')
+    svgEl.removeAttribute('fill')
+	  svgEl.setAttribute('xmlns', "http://www.w3.org/2000/svg")
+
+    Array.from(svgEl.children).forEach(el => {
+      el.removeAttribute('style')
+      el.removeAttribute('class')
+    })
+
+    fileStore.update(state => ({
+      ...state,
+      [inn.id]: {
+        ...state[inn.id],
+        svgEl,
+        processing: {
+          progress: 0.8
+        }
+      }
+    }))
+
+    const snapshot = await uploadBytes(svgRef, encoder.encode(`
+      <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+	    ${inn.svgEl.outerHTML}
+	 	`.replace('\n', '').replace('\t', '').trim()), {
+      contentType: 'application/octet-stream'
+    })
+
+    const waveUrl = await getDownloadURL(snapshot.ref)
+
+    inn.waveUrl = waveUrl
+
+    console.log(waveUrl)
+
+    fileStore.update(state => ({
+      ...state,
+      [inn.id]: {
+        ...state[inn.id],
+        waveUrl: waveUrl,
+        processing: {
+          progress: 1
+        }
+      } as InputFile
+    }))
+
+    return updateFileInput(inn).then(() => inn).then(res => {
+      console.log('what')
+    })
+  }
 
   async function generateWave(inn: InputFile) {
 
@@ -40,7 +94,7 @@
       }
     }))
 
-	  return await new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       WaveformData.createFromAudio(options, (err, waveform) => {
         if (err) {
           reject(err);
@@ -48,77 +102,88 @@
           resolve(waveform);
         }
       })
-	  }).then((res: WaveformData) => {
+    }).then((res: WaveformData) => {
+      inn.data = res as any
       fileStore.update(state => ({
         ...state,
         [inn.id]: {
           ...state[inn.id],
-          data: res as any,
+          data: inn.data,
           processing: {
-            progress: 1
+            progress: 0.75
           }
         }
       }))
+
+      return new Promise<InputFile>((resolve, reject) => {
+        fileStore.subscribe(files => {
+          const file = files[inn.id]
+          if (file.svgEl) {
+            resolve(file)
+          }
+        })
+        setTimeout(() => reject(), 20 * 1000) //TODO:: Error handling
+      }).then(uploadSVG)
     })
   }
 
   async function uploadFile(inn: InputFile) {
-		// Create a reference to 'mountains.jpg'
-		await new Promise((resolve, reject) => {
+    // Create a reference to 'mountains.jpg'
+    await new Promise((resolve, reject) => {
 
-			const names = inn.file.name.split(".")
-			const ext = names[names.length - 1]
-			const fileRef = ref(storage, inn.id + "/" + "audio." + ext);
+      const names = inn.file.name.split(".")
+      const ext = names[names.length - 1]
+      const fileRef = ref(storage, inn.id + "/" + "audio." + ext);
 
-			const uploadTask = uploadBytesResumable(fileRef, inn.file);
+      const uploadTask = uploadBytesResumable(fileRef, inn.file);
 
-		// Listen for state changes, errors, and completion of the upload.
-			uploadTask.on('state_changed',
-					(snapshot) => {
-						// Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
-						const progress = (snapshot.bytesTransferred / snapshot.totalBytes);
+      // Listen for state changes, errors, and completion of the upload.
+      uploadTask.on('state_changed',
+        (snapshot) => {
+          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes);
 
-						fileStore.update(state => ({
-							...state,
-							[inn.id]: {
-								...state[inn.id],
-								upload: {
-									...inn.upload,
-									progress
-								}
-							}
-						}))
-					},
-					reject,
-					() => {
-						getDownloadURL(uploadTask.snapshot.ref).then((audioUrl) => {
-							inn.audioUrl = audioUrl
+          fileStore.update(state => ({
+            ...state,
+            [inn.id]: {
+              ...state[inn.id],
+              upload: {
+                ...inn.upload,
+                progress
+              }
+            }
+          }))
+        },
+        reject,
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((audioUrl) => {
+            inn.audioUrl = audioUrl
 
-							fileStore.update(state => ({
-								...state,
-								[inn.id]: {
-									...state[inn.id],
-									audioUrl: audioUrl,
-									upload: {
-									  progress: 1
-									}
-								} as InputFile
-							}))
+            fileStore.update(state => ({
+              ...state,
+              [inn.id]: {
+                ...state[inn.id],
+                audioUrl: audioUrl,
+                upload: {
+                  progress: 1
+                }
+              } as InputFile
+            }))
 
-							resolve(inn) //TODO:: Fix return here ?
+            return updateFileInput(inn).then(() => resolve(inn))
 
-						}).catch(reject);
-					}
-			);
-		})
+          }).catch(reject);
+        }
+      );
+    })
 
 
-	}
+  }
 
   function onInput({detail}: { detail: InputFile }) {
-		// startUpload(detail)
-	  uploadHandler.post(detail)
-	  processHandler.post(detail)
+    // startUpload(detail)
+    uploadHandler.post(detail)
+    processHandler.post(detail)
   }
 
   onMount(() => {

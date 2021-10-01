@@ -9,6 +9,7 @@
   import IconInfo from "../icons/IconInfo.svelte";
   import {setEditFile} from "../lib/associate";
   import compareDesc from "date-fns/compareDesc";
+  import fileStore from "../lib/stores";
 
   export let files: Array<InputFile> = []
   $: files = Object.keys($fileStore)
@@ -27,6 +28,16 @@
     calculateColumns()
   })
 
+  function onWaveformReady(svgEl: SVGElement, file: InputFile) {
+	  fileStore.update(state => ({
+		  ...state,
+		  [file.id]: {
+		    ...state[file.id],
+		    svgEl
+		  }
+	  }))
+  }
+
 </script>
 
 <svelte:window on:resize={calculateColumns}/>
@@ -44,7 +55,7 @@
 		{#each files as file}
 			<div class="file" transition:fly>
 				{#if file.data}
-					<Waveform data={file.data}/>
+					<Waveform data={file.data} on:ready={e => onWaveformReady(e.detail, file)}/>
 				{:else}
 					<IconAudio/>
 				{/if}

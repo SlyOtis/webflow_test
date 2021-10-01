@@ -17,6 +17,7 @@ export type InputFile = {
   data?: WaveformData
   upload?: FileProgressInfo
   processing?: FileProgressInfo
+  svgEl?: SVGElement
   audioUrl?: String
   waveUrl?: String
   refId?: String

@@ -1,5 +1,7 @@
 <script lang="ts">
   import {WaveformData} from "waveform-data/dist/waveform-data";
+  import {createEventDispatcher, onMount} from "svelte";
+  const dispatch = createEventDispatcher()
 
   export let data: WaveformData | null = null
   export let samplesPP = 128
@@ -15,6 +17,8 @@
 
   let className: string = null
   export {className as class}
+
+  let svgEl: SVGElement
 
   const scaleY = (amplitude, height) => {
     const range = 256;
@@ -56,11 +60,16 @@
 
   $: samples = data && mapSamples(data) || [];
 
+  onMount(() => {
+	  dispatch("ready", svgEl.cloneNode(true))
+  })
+
 </script>
 
 {#if samples.length > 0}
 	<svg
 			{id}
+			bind:this={svgEl}
 			class="waveform {className}"
 			viewBox="0 0 {samples.length * (sampleGap + sampleWidth)} {maxY * 2}"
 			width="100%"
