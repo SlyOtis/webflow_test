@@ -32,7 +32,7 @@
     fileStore.update(state => ({
       ...state,
       [inn.id]: {
-        ...inn,
+        ...state[inn.id],
         processing: {
           progress: 0.5
         }
@@ -51,7 +51,7 @@
       fileStore.update(state => ({
         ...state,
         [inn.id]: {
-          ...inn,
+          ...state[inn.id],
           data: res as any,
           processing: {
             progress: 1
@@ -90,18 +90,21 @@
 					},
 					reject,
 					() => {
-						getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-							inn.audioUrl = downloadURL
+						getDownloadURL(uploadTask.snapshot.ref).then((audioUrl) => {
+							inn.audioUrl = audioUrl
 
 							fileStore.update(state => ({
 								...state,
 								[inn.id]: {
-									...inn,
-									...state[inn.id]
-								}
+									...state[inn.id],
+									audioUrl: audioUrl,
+									upload: {
+									  progress: 1
+									}
+								} as InputFile
 							}))
 
-							resolve(inn)
+							resolve(inn) //TODO:: Fix return here ?
 
 						}).catch(reject);
 					}
@@ -121,6 +124,8 @@
 		if (!first) return
 		isProcessing = true
 		processFileInput(first)
+
+
   }
 
   async function processFileInput(inn: InputFile) {
