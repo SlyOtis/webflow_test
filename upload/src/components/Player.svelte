@@ -7,34 +7,53 @@
 
   export let src: InputFile;
   export let width = 305;
+  export let updateRate = 60
 
   let player: HTMLAudioElement
   let playing: boolean = false
   let canPlay: boolean = false
+  let progress: number = 0
+  let playback: any
 
-  function playPause(e) {
-    if (playing) player.pause()
-    else player.play()
-    playing = !playing
+  function stopPlayback() {
+    clearTimeout(playback)
+    progress = 0
+    playing = false
+  }
+
+  function startPlayback() {
+    clearTimeout(playback)
+	  progress = (player?.currentTime || 0)
+	  const dur = (player?.duration || 0.1)
+    playback = setInterval(() => {
+      progress = (player.currentTime / dur) * 100
+    }, updateRate)
+
+    playing = true
+  }
+
+  function playPause() {
+    if (playing) {
+      stopPlayback()
+      player.pause()
+    }
+    else {
+      player.play()
+	    startPlayback()
+    }
   }
 
   function onPlaying(e) {
-    playing = !player.paused
-
-	  if (e.type == 'ended') {
-	    player.currentTime =  0
+	  switch (e.type) {
+	    case 'play':
+		  case 'playing':
+		    break
+      default:
+        stopPlayback()
+			  break
 	  }
   }
 
-  function onUpdate(e) {
-	  if (e.type == "timeupdate" && player) {
-      player.currentTime
-	  }
-  }
-
-  function onDuration(e) {
-    console.log(player.duration)
-  }
 </script>
 
 <div class="root">
@@ -48,8 +67,8 @@
 
 	{#if src.data}
 		<div class="waveform-container" style="width: {width}px">
-			<div class="waveform-wrapper overlay">
-				<div class="waveform" style="width: {width}px; left: 0;">
+			<div class="waveform-wrapper overlay" style="right: {(100 - progress)}%;">
+				<div class="waveform" style="width: {width}px;">
 					<Waveform
 							data={src.data}
 							class="waveform-scroll"
@@ -57,8 +76,8 @@
 					/>
 				</div>
 			</div>
-			<div class="waveform-wrapper">
-				<div class="waveform" style="width: {width}px; right: 0;">
+			<div class="waveform-wrapper" style="left: {progress}%;">
+				<div class="waveform" style="width: {width}px;">
 					<Waveform
 							data={src.data}
 							color="white"
@@ -81,8 +100,6 @@
 			on:pause={onPlaying}
 			on:abort={onPlaying}
 			on:ended={onPlaying}
-			on:timeupdate={onUpdate}
-			on:durationchange={onDuration}
 	>
 		<source src={URL.createObjectURL(src.file)} type="audio/wav">
 	</audio>
@@ -146,6 +163,10 @@
     stroke: red;
   }
 
+  .overlay > .waveform {
+    left: 0;
+  }
+
   .waveform {
     position: absolute;
     top: 0;
@@ -163,7 +184,10 @@
 	  right: 0;
 	  bottom: 0;
     will-change: right, left;
-    transition: 50ms all ease-out;
+  }
+
+  .waveform-wrapper > .waveform {
+    right: 0;
   }
 
 </style>
