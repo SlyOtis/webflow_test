@@ -24,35 +24,56 @@ export type InputFile = {
 export type QueueProcess<T> = (next: T) => (Promise<T> | Promise<void>)
 
 export class HandlerQueue<T> {
-  buffer: Array<T> = []
-  isRunning: boolean = false
+  protected buffer: Array<T> = []
+  protected _isRunning: boolean = false
+  protected process: QueueProcess<T>
+  protected kill: boolean = false
+
   delay: number = 200
-  process: QueueProcess<T>
 
   constructor(process: QueueProcess<T>, delay: number = 0) {
     this.delay = delay
     this.process = process
   }
 
+  get isAlive(): boolean {
+    return !this.kill
+  }
+
+  get isRunning(): boolean {
+    return this._isRunning
+  }
+
   post(next: T) {
     this.buffer.push(next)
-    if (this.isRunning) return
+    if (this._isRunning) return
     const first = this.buffer.shift()
     if (!first) return
-    this.isRunning = true
+    this._isRunning = true
     this.tryNext(next)
   }
 
   private async tryNext(current: T) {
+    if (this.kill) return
     await this.process(current)
+
     if (this.delay > 0) {
       await new Promise(resolve => setTimeout(() => resolve(0), 200))
     }
+
     const next = this.buffer.shift()
     if (next) {
       return await this.tryNext(next)
     } else {
-      this.isRunning = false
+      this._isRunning = false
     }
+  }
+
+  /**
+   * Joins to the main thread by completing the ongoing process and then completing
+   */
+  join(clearQueue: boolean = true) {
+    this.kill = true
+    if (clearQueue) this.buffer = []
   }
 }
