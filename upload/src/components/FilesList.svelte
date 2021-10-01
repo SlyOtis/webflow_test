@@ -14,8 +14,17 @@
   export let files: Array<InputFile> = []
   $: files = Object.keys($fileStore)
 	  .map(key => $fileStore[key] as InputFile)
-    .sort((a, b) => compareDesc(a.createdAt, b.createdAt))
-    .sort((a, b) => (a.refId && b.refId) ? 0 : (!a.refId && b.refId) ? -1 : 1)
+    .sort((a, b) => {
+      if (!a.waveUrl || !b.waveUrl) {
+        return (!a.waveUrl && b.waveUrl) ? 1 : -1
+      }
+
+      if (!a.refId || !b.refId) {
+        return (!a.refId && b.refId) ? -1 : 1
+      }
+
+      return compareDesc(a.createdAt, b.createdAt)
+    })
 
   let gridTemplateColumns = 'unset'
 

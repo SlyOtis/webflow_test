@@ -11,9 +11,6 @@
   let player: HTMLAudioElement
   let playing: boolean = false
   let canPlay: boolean = false
-  let progress: number = 0
-
-  $: progress = player?.currentTime || 0
 
   function playPause(e) {
     if (playing) player.pause()
@@ -25,14 +22,18 @@
     playing = !player.paused
 
 	  if (e.type == 'ended') {
-	    player.currentTime = progress = 0
+	    player.currentTime =  0
 	  }
   }
 
   function onUpdate(e) {
 	  if (e.type == "timeupdate" && player) {
-      progress = player.currentTime
+      player.currentTime
 	  }
+  }
+
+  function onDuration(e) {
+    console.log(player.duration)
   }
 </script>
 
@@ -46,8 +47,8 @@
 	</div>
 
 	{#if src.data}
-		<div class="waveform-container">
-			<div class="waveform-wrapper overlay" style="right: {(1 - progress) * 100}%;">
+		<div class="waveform-container" style="width: {width}px">
+			<div class="waveform-wrapper overlay">
 				<div class="waveform" style="width: {width}px; left: 0;">
 					<Waveform
 							data={src.data}
@@ -56,7 +57,7 @@
 					/>
 				</div>
 			</div>
-			<div class="waveform-wrapper" style="left: {progress * 100}%;">
+			<div class="waveform-wrapper">
 				<div class="waveform" style="width: {width}px; right: 0;">
 					<Waveform
 							data={src.data}
@@ -81,6 +82,7 @@
 			on:abort={onPlaying}
 			on:ended={onPlaying}
 			on:timeupdate={onUpdate}
+			on:durationchange={onDuration}
 	>
 		<source src={URL.createObjectURL(src.file)} type="audio/wav">
 	</audio>
@@ -89,9 +91,8 @@
 <style>
 
   .root {
-    flex: 1;
     position: relative;
-    width: 100%;
+    width: auto;
     min-width: 50px;
     display: flex;
     justify-content: center;

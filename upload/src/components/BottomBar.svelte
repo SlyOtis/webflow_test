@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type {InputFile, ProgressInfo} from "../lib/utils";
+  import type {InputFile} from "../lib/utils";
   import ProgressBar from "./ProgressBar.svelte";
-  import fileStore from "../lib/stores";
+  import fileStore, {updateFileInput} from "../lib/stores";
   import {clearEditFile, editFile, setEditFile} from "../lib/associate";
   import Player from "./Player.svelte";
   import compareDesc from "date-fns/compareDesc";
@@ -71,19 +71,24 @@
   function onSubmit(e) {
     const input = e.target.elements.refId
     const refId = input.value
-	  input.value = null
+    input.value = null
 
-    const file = $editFile
+    let file = $editFile
     if (refId && refId.length > 2 && file) {
-      fileStore.update(state => ({
-        ...state,
-        [file.id]: {
+      fileStore.update(state => {
+        file = {
           ...state[file.id],
           refId
         }
-      }))
+        return {
+          ...state,
+          [file.id]: file
+        }
+      })
 
-      const nextFile = files.find(value => value.id !== file.id && !file.refId)
+	    updateFileInput(file)
+
+      const nextFile = files.find(value => value.id !== file.id && !value.refId)
       if (nextFile) {
         setEditFile(nextFile)
       } else {
@@ -109,35 +114,37 @@
 {#if files?.length}
 	<div class="root card-background" class:editing={$editFile}>
 		{#if $editFile}
-			<div class="close" on:click|preventDefault|stopPropagation={clearEditFile}>
-				<IconClose />
-			</div>
-			<Player src={$editFile}/>
-			<form
-					bind:this={form}
-					on:submit|preventDefault|stopPropagation={onSubmit}
-			>
-				<h4>{$editFile.name}</h4>
-				<p>
-					Fyll inn ref-iden fra webflow her for å koble sammen player og butikkoppføring.
-				</p>
-				<div class="input-container">
-					<input
-							id="refId"
-							name="refId"
-							type="text"
-							autocomplete="off"
-							spellcheck="off"
-							placeholder=" "
-					/>
-					<label for="refId">
-						RefId
-					</label>
+			{#key $editFile.id}
+				<div class="close" on:click|preventDefault|stopPropagation={clearEditFile}>
+					<IconClose/>
 				</div>
-				<button type="submit">
-					Set RefId
-				</button>
-			</form>
+				<Player src={$editFile}/>
+				<form
+						bind:this={form}
+						on:submit|preventDefault|stopPropagation={onSubmit}
+				>
+					<h4>{$editFile.name}</h4>
+					<p>
+						Fyll inn ref-iden fra webflow her for å koble sammen player og butikkoppføring.
+					</p>
+					<div class="input-container">
+						<input
+								id="refId"
+								name="refId"
+								type="text"
+								autocomplete="off"
+								spellcheck="off"
+								placeholder=" "
+						/>
+						<label for="refId">
+							RefId
+						</label>
+					</div>
+					<button type="submit">
+						Set RefId
+					</button>
+				</form>
+			{/key}
 		{:else }
 			<ProgressBar title="Uploading" info={info.uploads}/>
 			<ProgressBar title="Processing" info={info.processing}/>
@@ -170,7 +177,8 @@
   .editing {
     flex-direction: row;
     background-color: var(--background);
-	  justify-content: center;
+    justify-content: center;
+    width: auto;
   }
 
   form {
@@ -218,8 +226,8 @@
     z-index: 2;
     opacity: 0.65;
     background-color: var(--selected);
-	  user-select: none;
-	  pointer-events: none;
+    user-select: none;
+    pointer-events: none;
   }
 
   input:focus + label, input:active + label {
@@ -241,54 +249,54 @@
   }
 
   p {
-	  font-size: 0.8em;
-	  user-select: none;
+    font-size: 0.8em;
+    user-select: none;
   }
 
   button {
-	  position: relative;
-	  justify-self: flex-end;
-	  align-self: flex-end;
-	  margin-top: 8px;
-	  border-radius: 1em;
-	  background-color: var(--selected);
+    position: relative;
+    justify-self: flex-end;
+    align-self: flex-end;
+    margin-top: 8px;
+    border-radius: 1em;
+    background-color: var(--selected);
     border: 1px solid #3b3b3b;
-	  color: white;
-	  padding: 4px 8px;
-	  font-size: 0.8em;
-	  text-transform: uppercase;
-	  letter-spacing: 1px;
-	  transition: 250ms all ease-out;
-	  transform-origin: center;
-	  outline: none;
+    color: white;
+    padding: 4px 8px;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: 250ms all ease-out;
+    transform-origin: center;
+    outline: none;
     cursor: pointer;
   }
 
   button:hover, button:focus {
-	  border-color: #ababab;
+    border-color: #ababab;
   }
 
   button:active {
-	  transform: scale(0.99);
+    transform: scale(0.99);
   }
 
   .close {
-	  position: absolute;
-	  top: 0;
-	  right: 0;
-	  width: 24px;
-	  height: 24px;
-	  border-radius: 50%;
-	  color: white;
-	  fill: white;
-	  padding: 4px;
-	  cursor: pointer;
-	  transition: 250ms all ease-out;
-	  z-index: 10;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: white;
+    fill: white;
+    padding: 4px;
+    cursor: pointer;
+    transition: 250ms all ease-out;
+    z-index: 10;
   }
 
   .close:hover {
-	  transform: scale(1.2);
+    transform: scale(1.2);
   }
 
   .close:active {
@@ -296,11 +304,11 @@
   }
 
   h4 {
-	  margin: 0;
-	  padding: 0;
-	  text-align: start;
-	  width: auto;
-	  user-select: none;
+    margin: 0;
+    padding: 0;
+    text-align: start;
+    width: auto;
+    user-select: none;
   }
 
 </style>
