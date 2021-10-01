@@ -1,13 +1,16 @@
 {
   "name": "upload",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "scripts": {
     "dev": "vite --port 4200 --cors",
     "build": "vite build",
     "serve": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "copy": "copy ./dist ../dist/upload/"
+    "copy": "copy ./dist ../dist/upload/",
+    "bdp": "yarn build && yarn deploy",
+    "deploy": "firebase deploy",
+    "bamp": "bamp -c -t -u"
   },
   "dependencies": {
     "date-fns": "^2.23.0",

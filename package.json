@@ -8,9 +8,9 @@
   "private": true,
   "scripts": {
     "postinstall": "cd upload && yarn",
-    "build": "webpack --config webpack.config.js",
     "upload:build": "cd upload && yarn build && cd ..",
     "upload:copy": "cd upload && yarn copy",
+    "build": "webpack --config webpack.config.js",
     "bdp": "yarn build && yarn deploy",
     "deploy": "firebase deploy",
     "bamp": "bamp -c -t -u",

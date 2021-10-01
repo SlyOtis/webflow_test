@@ -5,7 +5,6 @@
   import {fly, fade} from "svelte/transition";
   import Waveform from "./Waveform.svelte";
   import IconAudio from "../icons/IconAudio.svelte";
-  import fileStore from "../lib/stores";
   import IconInfo from "../icons/IconInfo.svelte";
   import {setEditFile} from "../lib/associate";
   import compareDesc from "date-fns/compareDesc";
@@ -15,15 +14,10 @@
   $: files = Object.keys($fileStore)
 	  .map(key => $fileStore[key] as InputFile)
     .sort((a, b) => {
-      if (!a.waveUrl || !b.waveUrl) {
-        return (!a.waveUrl && b.waveUrl) ? 1 : -1
-      }
-
-      if (!a.refId || !b.refId) {
-        return (!a.refId && b.refId) ? -1 : 1
-      }
-
-      return compareDesc(a.createdAt, b.createdAt)
+      let sum = !!b.waveUrl - !!a.waveUrl
+	    sum += !!b.refId - !!a.refId
+	    sum += compareDesc(a.createdAt, b.createdAt)
+	    return sum
     })
 
   let gridTemplateColumns = 'unset'
