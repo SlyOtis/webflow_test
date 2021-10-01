@@ -12,7 +12,6 @@
     .map(key => $fileStore[key] as InputFile)
     .sort((a, b) => compareDesc(a.createdAt, b.createdAt))
 
-
   //TODO:: Do this on add or update ?
   const processFiles = (input: Array<InputFile>) => {
     const info = input.reduce((prev, curr) => {
@@ -70,7 +69,10 @@
   }
 
   function onSubmit(e) {
-    const refId = e.target.elements.refId.value
+    const input = e.target.elements.refId
+    const refId = input.value
+	  input.value = null
+
     const file = $editFile
     if (refId && refId.length > 2 && file) {
       fileStore.update(state => ({
@@ -94,6 +96,14 @@
 
   $: info = processFiles(files)
 
+  let form: HTMLFormElement, oldEdit = null
+  $: if ($editFile) {
+    if (oldEdit != $editFile.id) {
+      form?.reset()
+    }
+    oldEdit = $editFile.id
+  }
+
 </script>
 
 {#if files?.length}
@@ -104,8 +114,10 @@
 			</div>
 			<Player src={$editFile}/>
 			<form
+					bind:this={form}
 					on:submit|preventDefault|stopPropagation={onSubmit}
 			>
+				<h4>{$editFile.name}</h4>
 				<p>
 					Fyll inn ref-iden fra webflow her for å koble sammen player og butikkoppføring.
 				</p>
@@ -166,7 +178,7 @@
     flex: 1;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
     color: white;
     max-width: 250px;
   }
@@ -277,6 +289,13 @@
 
   .close:active {
     transform: scale(0.8);
+  }
+
+  h4 {
+	  margin: 0;
+	  padding: 0;
+	  text-align: start;
+	  width: auto;
   }
 
 </style>
