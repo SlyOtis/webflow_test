@@ -1,6 +1,6 @@
 {
   "name": "webflow_test",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/player.js",
   "repository": "https://github.com/SlyOtis/webflow_test.git",
   "author": "Martin Ottersland <Ottini93@gmail.com>",
@@ -12,7 +12,10 @@
     "upload:build": "cd upload && yarn build && cd ..",
     "upload:copy": "cd upload && yarn copy",
     "bdp": "yarn build && yarn deploy",
-    "deploy": "firebase deploy"
+    "deploy": "firebase deploy",
+    "bamp": "bamp -c -t -u",
+    "pp": "yarn bamp -p && yarn bdp",
+    "pn": "yarn bamp -n && yarn bdp"
   },
   "dependencies": {
     "firebase": "9.0.1"
