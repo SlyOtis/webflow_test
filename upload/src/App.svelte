@@ -11,13 +11,14 @@
   import {fileStore} from "./lib/stores"
 	import {storage} from "./lib/firebase";
   import {ref, uploadBytesResumable, getDownloadURL} from "firebase/storage"
+  import {HandlerQueue} from "./lib/utils";
 
 
 	let ready = false
   const audioContext = new AudioContext();
 
-	const toProcess: Array<InputFile> = []
-	let isProcessing = false
+  const uploadHandler = new HandlerQueue<InputFile>(uploadFile)
+  const processHandler = new HandlerQueue<InputFile>(generateWave)
 
   async function generateWave(inn: InputFile) {
 
@@ -115,29 +116,10 @@
 	}
 
   function onInput({detail}: { detail: InputFile }) {
-		toProcess.push(detail)
-
-		uploadFile(detail)
-
-		if (isProcessing) return
-		const first = toProcess.shift()
-		if (!first) return
-		isProcessing = true
-		processFileInput(first)
-
-
+		// startUpload(detail)
+	  uploadHandler.post(detail)
+	  processHandler.post(detail)
   }
-
-  async function processFileInput(inn: InputFile) {
-		await generateWave(inn)
-		await new Promise(resolve => setTimeout(() => resolve(), 200))
-		const next = toProcess.shift()
-		if (next) {
-			return await processFileInput(next)
-		} else {
-			isProcessing = false
-		}
-	}
 
   onMount(() => {
     ready = false
