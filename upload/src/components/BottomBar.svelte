@@ -95,6 +95,8 @@
         clearEditFile()
       }
 
+      input.focus()
+
       return
     }
   }
@@ -103,8 +105,9 @@
 
   let form: HTMLFormElement, oldEdit = null
   $: if ($editFile) {
-    if (oldEdit != $editFile.id) {
-      form?.reset()
+    if (oldEdit != $editFile.id && form) {
+      form.reset()
+	    form.elements.refId.focus()
     }
     oldEdit = $editFile.id
   }
@@ -135,6 +138,8 @@
 								autocomplete="off"
 								spellcheck="off"
 								placeholder=" "
+								tabindex="0"
+								autofocus
 						/>
 						<label for="refId">
 							RefId
