@@ -50,7 +50,7 @@
       <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 	    ${inn.svgEl.outerHTML}
 	 	`.replace('\n', '').replace('\t', '').trim()), {
-      contentType: 'application/octet-stream'
+      contentType: 'image/svg+xml'
     })
 
     const waveUrl = await getDownloadURL(snapshot.ref)

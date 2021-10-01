@@ -15,7 +15,7 @@
   let progress: number = 0
   let playback: any
   let useFile: boolean = !!src.file
-  let _src: string =  useFile ? URL.createObjectURL(src.file) : src.audioUrl
+  let _src: string = useFile ? URL.createObjectURL(src.file) : src.audioUrl
 
   function stopPlayback() {
     clearTimeout(playback)
@@ -67,7 +67,7 @@
 	</div>
 
 	<div class="waveform-container" style="width: {width}px">
-		{#if src.data}
+		{#if useFile && src.data}
 			<div class="waveform-wrapper overlay" style="right: {(100 - progress)}%;">
 				<div class="waveform" style="width: {width}px;">
 					<Waveform
@@ -84,6 +84,17 @@
 							color="white"
 							class="waveform-scroll"
 					/>
+				</div>
+			</div>
+		{:else if !useFile }
+			<div class="waveform-wrapper overlay" style="right: {(100 - progress)}%;">
+				<div class="waveform" style="width: {width}px;">
+				<embed width="100%" src={src.waveUrl} type="image/svg+xml" />
+				</div>
+			</div>
+			<div class="waveform-wrapper" style="left: {progress}%;">
+				<div class="waveform" style="width: {width}px;">
+					<embed width="100%" src={src.waveUrl} type="image/svg+xml" />
 				</div>
 			</div>
 		{:else }
