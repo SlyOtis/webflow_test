@@ -62,7 +62,7 @@
 				{:else}
 					<IconAudio/>
 				{/if}
-				{#if !file.refId}
+				{#if !file.slug}
 					<div
 							class="associate"
 							on:click|preventDefault|stopPropagation={() => setEditFile(file)}
