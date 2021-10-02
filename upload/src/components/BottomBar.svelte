@@ -143,11 +143,11 @@
 								autofocus
 						/>
 						<label for="slug">
-							RefId
+							Slug
 						</label>
 					</div>
 					<button type="submit">
-						Set RefId
+						Set Slug
 					</button>
 				</form>
 			{/key}
