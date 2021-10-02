@@ -4,6 +4,8 @@
   import IconPlay from "../icons/IconPlay.svelte";
   import Waveform from "./Waveform.svelte";
   import IconAudio from "../icons/IconAudio.svelte";
+  import {ref, getDownloadURL} from "firebase/storage";
+  import {storage} from "../lib/firebase";
 
   export let src: InputFile;
   export let width = 305;
@@ -57,76 +59,82 @@
 
   console.log(src.waveUrl)
 
+  const getWaveSvg = () => getDownloadURL(ref(storage, src.id + "/waveform.svg"))
+      .then(data => fetch(data, {
+        method: 'get',
+        mode: 'no-cors'
+      }))
+      .then(response => response)
+      .then(text => console.log(text))
+
+/*
   const getWaveSvg = () => fetch(src.waveUrl, {
-    method: 'GET',
     mode: 'no-cors',
-  }).then(res => res.ok)
-  .then(res => {
-    console.log(res)
-	  return res
-  })
+  }).then(res => console.log(res))
+      .then(res => {
+        console.log(res)
+        return res
+      })*/
 
 </script>
 
 <div class="root">
-	<div class="play-pause" on:click|preventDefault|stopPropagation={playPause}>
-		{#if playing}
-			<IconPause/>
-		{:else }
-			<IconPlay/>
-		{/if}
-	</div>
+  <div class="play-pause" on:click|preventDefault|stopPropagation={playPause}>
+    {#if playing}
+      <IconPause/>
+    {:else }
+      <IconPlay/>
+    {/if}
+  </div>
 
-	<div class="waveform-container" style="width: {width}px">
-		{#if useFile && src.data}
-			<div class="waveform-wrapper overlay" style="right: {(100 - progress)}%;">
-				<div class="waveform" style="width: {width}px;">
-					<Waveform
-							data={src.data}
-							class="waveform-scroll"
-							noAnimation
-					/>
-				</div>
-			</div>
-			<div class="waveform-wrapper" style="left: {progress}%;">
-				<div class="waveform" style="width: {width}px;">
-					<Waveform
-							data={src.data}
-							color="white"
-							class="waveform-scroll"
-					/>
-				</div>
-			</div>
-		{:else if !useFile }
-			{#await getWaveSvg() then resp}
-				<div class="waveform-wrapper overlay" style="right: {(100 - progress)}%;">
-					<div class="waveform" style="width: {width}px;">
-						{@html resp}
-					</div>
-				</div>
-				<div class="waveform-wrapper" style="left: {progress}%;">
-					<div class="waveform" style="width: {width}px;">
-						{@html resp}
-					</div>
-				</div>
-			{/await}
-		{:else }
-			<IconAudio/>
-		{/if}
-	</div>
+  <div class="waveform-container" style="width: {width}px">
+    {#if useFile && src.data}
+      <div class="waveform-wrapper overlay" style="right: {(100 - progress)}%;">
+        <div class="waveform" style="width: {width}px;">
+          <Waveform
+              data={src.data}
+              class="waveform-scroll"
+              noAnimation
+          />
+        </div>
+      </div>
+      <div class="waveform-wrapper" style="left: {progress}%;">
+        <div class="waveform" style="width: {width}px;">
+          <Waveform
+              data={src.data}
+              color="white"
+              class="waveform-scroll"
+          />
+        </div>
+      </div>
+    {:else if !useFile }
+      <div class="waveform-wrapper overlay" style="right: {(100 - progress)}%;">
+        <div class="waveform" style="width: {width}px;">
+          <object data={src.waveUrl} type="image/svg+xml"></object>
+        </div>
+      </div>
+      <div class="waveform-wrapper" style="left: {progress}%;">
+        <div class="waveform" style="width: {width}px;">
+          <object data={src.waveUrl} type="image/svg+xml"></object>
+        </div>
+      </div>
+    {:else }
+      <IconAudio/>
+    {/if}
+  </div>
 
-	<audio
-			bind:this={player}
-			on:canplay={() => canPlay = true}
-			on:error={() => canPlay = false}
-			on:playing={onPlaying}
-			on:play={onPlaying}
-			on:pause={onPlaying}
-			on:abort={onPlaying}
-			on:ended={onPlaying}
-	>
-		<source src={_src} type="audio/wav">
-	</audio>
+  <audio
+      bind:this={player}
+      on:canplay={() => canPlay = true}
+      on:error={() => canPlay = false}
+      on:playing={onPlaying}
+      on:play={onPlaying}
+      on:pause={onPlaying}
+      on:abort={onPlaying}
+      on:ended={onPlaying}
+  >
+    <source src={_src} type="audio/wav">
+  </audio>
 </div>
 
 <style>

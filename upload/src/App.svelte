@@ -3,7 +3,6 @@
   import Player from './Player.svelte'
 
   const upload = location.pathname.startsWith("/upload")
-  console.log(upload)
 
 </script>
 

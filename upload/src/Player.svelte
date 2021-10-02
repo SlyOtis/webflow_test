@@ -1,12 +1,8 @@
 <script lang="ts">
   import Player from "./components/Player.svelte";
-  import type {InputFile} from "./lib/utils";
   import {
     ref,
-    get,
-    onChildAdded,
-    onChildChanged,
-    onChildRemoved,
+    get
   } from 'firebase/database'
   import {database} from "./lib/firebase";
 

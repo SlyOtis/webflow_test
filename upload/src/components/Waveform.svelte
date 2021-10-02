@@ -1,6 +1,8 @@
 <script lang="ts">
   import {WaveformData} from "waveform-data/dist/waveform-data";
   import {createEventDispatcher, onMount} from "svelte";
+  import "../waveform.css"
+
   const dispatch = createEventDispatcher()
 
   export let data: WaveformData | null = null
@@ -93,27 +95,6 @@
 {/if}
 
 <style>
-  @keyframes sample {
-    0% {
-      z-index: 2;
-      transform: scale(1);
-    }
-    40% {
-      z-index: 100;
-      transform: scale(1.5);
-    }
-    100% {
-      z-index: 1;
-      transform: scale(1);
-    }
-  }
-
-  .animation {
-    animation-name: sample;
-    animation-duration: 500ms;
-    transform-origin: center;
-    transition-timing-function: ease-out;
-  }
 
   rect {
     z-index: 1;
