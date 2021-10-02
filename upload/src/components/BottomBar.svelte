@@ -39,7 +39,7 @@
         associated: {
           ...prev.associated,
           total: prev.associated.total + 1,
-          ...curr.refId && {
+          ...curr.slug && {
             index: prev.associated.index + 1
           }
         }
@@ -69,16 +69,16 @@
   }
 
   function onSubmit(e) {
-    const input = e.target.elements.refId
-    const refId = input.value
+    const input = e.target.elements.slug
+    const slug = input.value
     input.value = null
 
     let file = $editFile
-    if (refId && refId.length > 2 && file) {
+    if (slug && slug.length > 2 && file) {
       fileStore.update(state => {
         file = {
           ...state[file.id],
-          refId
+          slug
         }
         return {
           ...state,
@@ -89,7 +89,7 @@
 	    updateFileInput(file)
       setAssociation(file)
 
-      const nextFile = files.find(value => value.id !== file.id && !value.refId)
+      const nextFile = files.find(value => value.id !== file.id && !value.slug)
       if (nextFile) {
         setEditFile(nextFile)
       } else {
@@ -108,7 +108,7 @@
   $: if ($editFile) {
     if (oldEdit != $editFile.id && form) {
       form.reset()
-	    form.elements.refId.focus()
+	    form.elements.slug.focus()
     }
     oldEdit = $editFile.id
   }
@@ -129,12 +129,12 @@
 				>
 					<h4>{$editFile.name}</h4>
 					<p>
-						Fyll inn ref-iden fra webflow her for å koble sammen player og butikkoppføring.
+						Fyll inn <i>slug</i> fra webflow her for å koble sammen player og butikkoppføring.
 					</p>
 					<div class="input-container">
 						<input
-								id="refId"
-								name="refId"
+								id="slug"
+								name="slug"
 								type="text"
 								autocomplete="off"
 								spellcheck="off"
@@ -142,7 +142,7 @@
 								tabindex="0"
 								autofocus
 						/>
-						<label for="refId">
+						<label for="slug">
 							RefId
 						</label>
 					</div>

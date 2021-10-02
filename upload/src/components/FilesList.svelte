@@ -15,7 +15,7 @@
 	  .map(key => $fileStore[key] as InputFile)
     .sort((a, b) => {
       let sum = !!b.waveUrl - !!a.waveUrl
-	    sum += !!b.refId - !!a.refId
+	    sum += !!b.slug - !!a.slug
 	    sum += compareDesc(a.createdAt, b.createdAt)
 	    return sum
     })

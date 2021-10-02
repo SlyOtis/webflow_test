@@ -79,7 +79,7 @@ export async function updateFileInput(inn: InputFile) {
 }
 
 export async function setAssociation(inn: InputFile) {
-  const fileRef = ref(database, 'refs/' + inn.refId)
+  const fileRef = ref(database, 'refs/' + inn.slug)
 
   await set(fileRef, {
     fileId: inn.id,

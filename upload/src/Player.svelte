@@ -13,6 +13,8 @@
   const paths = location.pathname.split('/')
   const key = paths[paths.length - 1]
 
+	console.info("Ref", key)
+
   async function getFileInput() {
     //TODO:: Throw on no key
     const fileId = (await get(ref(database, 'refs/' + key))).val()?.fileId

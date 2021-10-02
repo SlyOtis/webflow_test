@@ -20,7 +20,7 @@ export type InputFile = {
   svgEl?: SVGElement
   audioUrl?: String
   waveUrl?: String
-  refId?: String
+  slug?: String
 }
 
 export type QueueProcess<T> = (next: T) => (Promise<T> | Promise<void>)
