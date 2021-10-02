@@ -1,4 +1,4 @@
-<svg class="svg-icon" width="32px" height="32px" xmlns="http://www.w3.org/2000/svg" xml:space="preserve"
+<svg class="svg-icon" width="24px" height="24px" xmlns="http://www.w3.org/2000/svg" xml:space="preserve"
      style="shape-rendering:geometricPrecision;text-rendering:geometricPrecision;image-rendering:optimizeQuality"
      viewBox="0 0 570 676" fill-rule="evenodd" clip-rule="evenodd">
 	<path

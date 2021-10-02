@@ -60,7 +60,8 @@
     height: auto;
     justify-content: center;
     align-items: center;
-    border-radius: 6px;
+    border-radius: 8px;
+    padding: 8px;
     border: 2px solid var(--border);
     background-color: var(--background);
     overflow: hidden;

@@ -59,7 +59,7 @@
 
 <div class="root" class:boxnes={!useFile}>
   <div class="play-pause" on:click|preventDefault|stopPropagation={playPause}>
-    {#if playing}
+    {#if !playing}
       <IconPause/>
     {:else }
       <IconPlay/>
@@ -136,6 +136,9 @@
     color: var(--text);
     z-index: 1;
     transition: 350ms all ease-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .play-pause:hover, .play-pause:focus {
