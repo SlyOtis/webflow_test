@@ -82,11 +82,11 @@ export async function updateFileInput(inn: InputFile) {
 export async function setAssociation(inn: InputFile) {
   const fileRef = ref(database, 'slugs/' + inn.slug)
 
-  const existing = await get(fileRef).then(res => res.exists() ? existing.val() : null)
+  const existing = await get(fileRef).then(res => res.exists() ? res.val() : null)
 
   await set(fileRef, {
     fileIds: [
-        ...existing.fileIds,
+        ...existing ? existing?.fileIds : [],
       inn.id
     ],
     createdAt: existing?.createdAt || (new Date()).toISOString(),
