@@ -57,7 +57,7 @@
 
 </script>
 
-<div class="root">
+<div class="root" class:boxnes={useFile}>
   <div class="play-pause" on:click|preventDefault|stopPropagation={playPause}>
     {#if playing}
       <IconPause/>
@@ -199,6 +199,10 @@
 
   .waveform-wrapper > .waveform {
     right: 0;
+  }
+
+  .boxnes {
+    position: relative;
   }
 
 </style>
