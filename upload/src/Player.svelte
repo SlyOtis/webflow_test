@@ -17,7 +17,7 @@
 
   async function getFileInput() {
     //TODO:: Throw on no key
-    const fileId = (await get(ref(database, 'refs/' + key))).val()?.fileId
+    const fileId = (await get(ref(database, 'slugs/' + key))).val()?.fileId
 	  if (!fileId) {
 	    throw new Error("What the fuck?")
 	  }

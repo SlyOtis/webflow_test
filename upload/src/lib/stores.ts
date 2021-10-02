@@ -3,6 +3,7 @@ import type {InputFile} from "./utils";
 import {
   ref,
   set,
+  get,
   onChildAdded,
   onChildChanged,
   onChildRemoved,
@@ -79,11 +80,17 @@ export async function updateFileInput(inn: InputFile) {
 }
 
 export async function setAssociation(inn: InputFile) {
-  const fileRef = ref(database, 'refs/' + inn.slug)
+  const fileRef = ref(database, 'slugs/' + inn.slug)
+
+  const existing = await get(fileRef).then(res => res.exists() ? existing.val() : null)
 
   await set(fileRef, {
-    fileId: inn.id,
-    createdAt: (new Date()).toISOString()
+    fileIds: [
+        ...existing.fileIds,
+      inn.id
+    ],
+    createdAt: existing?.createdAt || (new Date()).toISOString(),
+    updatedAt: (new Date()).toISOString()
   })
 
   return fileRef
