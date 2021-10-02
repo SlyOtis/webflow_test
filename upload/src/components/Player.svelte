@@ -59,7 +59,7 @@
 
 <div class="root" class:boxnes={!useFile}>
   <div class="play-pause" on:click|preventDefault|stopPropagation={playPause}>
-    {#if !playing}
+    {#if playing}
       <IconPause/>
     {:else }
       <IconPlay/>
@@ -222,8 +222,8 @@
   }
 
   .boxnes > .waveform-container {
-    margin-right: 0;
-    margin-left: 16px;
+    margin-right: 8px;
+    margin-left: 8px;
   }
 
 

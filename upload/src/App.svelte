@@ -68,6 +68,8 @@
     overflow: hidden;
     fill: var(--text);
     color: var(--text);
+    margin-left: 16px;
+    margin-top: 16px;
   }
 
   .root:not(:last-of-type) {
