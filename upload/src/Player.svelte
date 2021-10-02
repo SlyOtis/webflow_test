@@ -20,12 +20,18 @@
 		const slugRef = ref(database, 'slugs/' + slug)
     const fileIds = await get(slugRef).then(res => res.exists() ? res.val().filedIds : null)
 
+		console.log(fileIds)
+
 		if (!fileIds) {
 	    throw new Error("What the fuck?")
 	  }
 
 	  return await get(ref(database, 'files/' + fileIds[0]))
-		  .then(res => res.val())
+		  .then(res => {
+				const val = res.val()
+				console.log(val)
+				return val
+			})
   }
 
   //77493D01-F987-47EB-927F-659E1A720B73
