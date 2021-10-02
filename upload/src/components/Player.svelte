@@ -6,7 +6,7 @@
   import IconAudio from "../icons/IconAudio.svelte";
 
   export let src: InputFile;
-  export let width = 305;
+  export let width = 200;
   export let updateRate = 60
 
   let player: HTMLAudioElement
@@ -57,7 +57,7 @@
 
 </script>
 
-<div class="root" class:boxnes={useFile}>
+<div class="root" class:boxnes={!useFile}>
   <div class="play-pause" on:click|preventDefault|stopPropagation={playPause}>
     {#if playing}
       <IconPause/>
@@ -159,8 +159,6 @@
     margin-left: 16px;
     margin-right: 16px;
     padding: 0;
-    min-width: 300px;
-    min-height: 130px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -203,6 +201,18 @@
 
   .boxnes {
     position: relative;
+    width: auto;
+    height: 54px;
+    padding-left: 8px;
+  }
+
+  .boxnes > .waveform-container {
+    margin-right: 0;
+    margin-left: 0;
+  }
+
+  .boxnes > .play-pause {
+
   }
 
 </style>

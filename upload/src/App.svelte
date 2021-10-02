@@ -22,9 +22,9 @@
   }
 
   async function getInputFile(id: string) {
-		return await get(ref(database, 'files/' + id))
-				.then(res => res.val())
-	}
+    return await get(ref(database, 'files/' + id))
+        .then(res => res.val())
+  }
 
   //77493D01-F987-47EB-927F-659E1A720B73
 </script>
@@ -35,10 +35,50 @@
   {:then fileIds}
     {#each fileIds as id}
       {#await getInputFile(id)}
-				<h1>Loading</h1>
+        <h3>Loading</h3>
       {:then inn}
-        <Player src={id}/>
+        <div class="root">
+          <Player src={inn}/>
+        </div>
       {/await}
     {/each}
   {/await}
 {/if}
+
+<style>
+
+  :root{
+    --border: #49CCFF;
+    --background: #102A34;
+    --text: white;
+  }
+
+  .root {
+    position: relative;
+    display: flex;
+    width: auto;
+    height: auto;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+    border: 2px solid var(--border);
+    background-color: var(--background);
+    overflow: hidden;
+    fill: var(--text);
+    color: var(--text);
+  }
+
+  .root:not(:last-of-type) {
+    margin-right: 16px;
+  }
+
+  :global(body){
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 8px 16px;
+  }
+
+
+
+</style>
