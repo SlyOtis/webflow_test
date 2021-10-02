@@ -132,9 +132,8 @@
     width: 2em;
     height: 2em;
     border-radius: 50%;
-    background-color: white;
-    fill: #212121;
-    color: #212121;
+    fill: var(--text);
+    color: var(--text);
     z-index: 1;
     transition: 350ms all ease-out;
   }
@@ -167,9 +166,9 @@
 
   .overlay {
     z-index: 2 !important;
-    fill: red;
-    color: red;
-    stroke: red;
+    fill: var(--border);
+    color: var(--border);
+    stroke: var(--border);
   }
 
   .overlay > .waveform {
