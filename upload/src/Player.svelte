@@ -13,31 +13,23 @@
   const paths = location.pathname.split('/')
   const slug = paths[paths.length - 1]
 
-	console.info("Slug", slug)
-
   async function getFileInput() {
     //TODO:: Throw on no key
 		const slugRef = ref(database, 'slugs/' + slug)
-    const fileIds = await get(slugRef).then(res => res.exists() ? res.val().filedIds : null)
-
-		console.log(fileIds)
+    const fileIds = await get(slugRef).then(res => res.exists() ? res.val().fileIds : null)
 
 		if (!fileIds) {
 	    throw new Error("What the fuck?")
 	  }
 
 	  return await get(ref(database, 'files/' + fileIds[0]))
-		  .then(res => {
-				const val = res.val()
-				console.log(val)
-				return val
-			})
+		  .then(res => res.val())
   }
 
   //77493D01-F987-47EB-927F-659E1A720B73
 </script>
 
-{#if slug?.length > 4}
+{#if slug?.length > 0}
 	{#await getFileInput()}
 		<h1>Loading</h1>
 	{:then inn}
