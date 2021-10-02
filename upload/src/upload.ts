@@ -1,7 +1,8 @@
-import App from './App.svelte'
+import Upload from './Upload.svelte'
+import './main.css'
 import './normalize.css'
 
-const app = new App({
+const app = new Upload({
   target: document.querySelector('body')
 })
 
