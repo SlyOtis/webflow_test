@@ -60,6 +60,7 @@
     height: auto;
     justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
     border-radius: 8px;
     padding: 8px;
     border: 2px solid var(--border);
@@ -77,7 +78,7 @@
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
-    padding: 8px 16px;
+    flex-wrap: wrap;
   }
 
 

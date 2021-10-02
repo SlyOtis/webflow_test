@@ -66,10 +66,12 @@
     {/if}
   </div>
 
-  <div class="waveform-container" style="width: {width}px">
+  <div class="waveform-container" style={`
+    width: ${width}px;
+  `}>
     {#if useFile && src.data}
       <div class="waveform-wrapper overlay" style="right: {(100 - progress)}%;">
-        <div class="waveform" style="width: {width}px;">
+        <div class="waveform-item" style="width: {width}px;">
           <Waveform
               data={src.data}
               class="waveform-scroll"
@@ -78,7 +80,7 @@
         </div>
       </div>
       <div class="waveform-wrapper" style="left: {progress}%;">
-        <div class="waveform" style="width: {width}px;">
+        <div class="waveform-item" style="width: {width}px;">
           <Waveform
               data={src.data}
               color="white"
@@ -88,12 +90,20 @@
       </div>
     {:else if !useFile }
       <div class="waveform-wrapper overlay" style="right: {(100 - progress)}%;">
-        <div class="waveform" style="width: {width}px;">
+        <div class="waveform-item" style={`
+          width: ${width}px;
+          min-width: ${width}px;
+          max-width: ${width}px;
+        `}>
           {@html src.svgData}
         </div>
       </div>
       <div class="waveform-wrapper" style="left: {progress}%;">
-        <div class="waveform" style="width: {width}px;">
+        <div class="waveform-item" style={`
+          width: ${width}px;
+          min-width: ${width}px;
+          max-width: ${width}px;
+        `}>
           {@html src.svgData}
         </div>
       </div>
@@ -123,8 +133,9 @@
     width: auto;
     min-width: 50px;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    overflow: hidden;
   }
 
   .play-pause {
@@ -162,9 +173,9 @@
     margin-right: 16px;
     padding: 0;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    overflow: hidden;;
+    overflow: hidden;
   }
 
   .overlay {
@@ -174,11 +185,11 @@
     stroke: var(--border);
   }
 
-  .overlay > .waveform {
+  .overlay > .waveform-item {
     left: 0;
   }
 
-  .waveform {
+  .waveform-item {
     position: absolute;
     top: 0;
     width: 100%;
@@ -197,24 +208,23 @@
     will-change: right, left;
   }
 
-  .waveform-wrapper > .waveform {
+  .waveform-wrapper > .waveform-item {
     right: 0;
   }
 
   .boxnes {
     position: relative;
     width: auto;
-    height: 54px;
+    height: 40px;
     padding-left: 8px;
+    max-width: 232px;
+    min-width: 100px;
   }
 
   .boxnes > .waveform-container {
     margin-right: 0;
-    margin-left: 0;
+    margin-left: 16px;
   }
 
-  .boxnes > .play-pause {
-
-  }
 
 </style>
