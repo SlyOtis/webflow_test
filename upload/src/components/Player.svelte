@@ -4,8 +4,6 @@
   import IconPlay from "../icons/IconPlay.svelte";
   import Waveform from "./Waveform.svelte";
   import IconAudio from "../icons/IconAudio.svelte";
-  import {ref, getDownloadURL} from "firebase/storage";
-  import {storage} from "../lib/firebase";
 
   export let src: InputFile;
   export let width = 305;
@@ -57,25 +55,6 @@
     }
   }
 
-  console.log(src.waveUrl)
-
-  const getWaveSvg = () => getDownloadURL(ref(storage, src.id + "/waveform.svg"))
-      .then(data => fetch(data, {
-        method: 'get',
-        mode: 'no-cors'
-      }))
-      .then(response => response)
-      .then(text => console.log(text))
-
-/*
-  const getWaveSvg = () => fetch(src.waveUrl, {
-    mode: 'no-cors',
-  }).then(res => console.log(res))
-      .then(res => {
-        console.log(res)
-        return res
-      })*/
-
 </script>
 
 <div class="root">
@@ -110,12 +89,12 @@
     {:else if !useFile }
       <div class="waveform-wrapper overlay" style="right: {(100 - progress)}%;">
         <div class="waveform" style="width: {width}px;">
-          <object data={src.waveUrl} type="image/svg+xml"></object>
+          {@html src.svgData}
         </div>
       </div>
       <div class="waveform-wrapper" style="left: {progress}%;">
         <div class="waveform" style="width: {width}px;">
-          <object data={src.waveUrl} type="image/svg+xml"></object>
+          {@html src.svgData}
         </div>
       </div>
     {:else }

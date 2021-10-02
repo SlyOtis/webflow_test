@@ -73,7 +73,7 @@ export async function updateFileInput(inn: InputFile) {
 
   await set(fileRef, {
     ...rest,
-    createdAt: createdAt.toISOString()
+    createdAt: createdAt.toISOString(),
   })
 
   return fileRef

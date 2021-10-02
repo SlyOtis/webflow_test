@@ -40,6 +40,7 @@
       [inn.id]: {
         ...state[inn.id],
         svgEl,
+				svgData: svgEl.outerHTML,
         processing: {
           progress: 0.8
         }

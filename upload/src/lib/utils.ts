@@ -18,6 +18,7 @@ export type InputFile = {
   upload?: FileProgressInfo
   processing?: FileProgressInfo
   svgEl?: SVGElement
+  svgData?: string
   audioUrl?: String
   waveUrl?: String
   slug?: String
