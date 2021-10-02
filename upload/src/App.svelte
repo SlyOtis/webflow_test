@@ -72,10 +72,6 @@
     margin-top: 16px;
   }
 
-  .root:not(:last-of-type) {
-    margin-right: 16px;
-  }
-
   :global(body){
     display: flex;
     justify-content: flex-start;

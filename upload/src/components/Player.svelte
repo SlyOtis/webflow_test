@@ -214,7 +214,7 @@
 
   .boxnes {
     position: relative;
-    width: auto;
+    width: 100%;
     height: 40px;
     padding-left: 8px;
     max-width: 232px;
