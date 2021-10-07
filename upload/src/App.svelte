@@ -89,6 +89,9 @@
     align-items: flex-start;
     flex-wrap: wrap;
     padding-right: 16px;
+    padding-bottom: 16px;
+    width: 100%;
+    height: 100%;
   }
 
 
