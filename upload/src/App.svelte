@@ -149,15 +149,23 @@
     overflow: hidden;
   }
 
+  :global(html) {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
   :global(body) {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     flex-wrap: wrap;
     padding-right: 16px;
     padding-bottom: 16px;
     width: 100%;
-    height: 100%;
+    height: auto;
   }
 
 
