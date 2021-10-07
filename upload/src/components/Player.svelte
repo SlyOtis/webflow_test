@@ -7,7 +7,7 @@
 
   export let src: InputFile;
   export let width = 200;
-  export let updateRate = 60
+  export let updateRate = 60;
 
   let player: HTMLAudioElement
   let playing: boolean = false
@@ -127,7 +127,6 @@
 </div>
 
 <style>
-
   .root {
     position: relative;
     width: auto;
@@ -215,9 +214,9 @@
   .boxnes {
     position: relative;
     width: 100%;
-    height: 40px;
+    height: var(--box-height);
     padding-left: 8px;
-    max-width: 232px;
+    max-width: var(--box-width);
     min-width: 100px;
   }
 

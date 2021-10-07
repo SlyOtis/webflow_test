@@ -9,6 +9,15 @@
   const paths = location.pathname.split('/')
   const slug = paths[paths.length - 1]
 
+  const params = new URLSearchParams(location.search)
+  const size = {
+    width: Number(params.get("w") || 232),
+    height: Number(params.get("h") || 24),
+  }
+
+  document.documentElement.style.setProperty('--box-width', size.width + 'px')
+  document.documentElement.style.setProperty('--box-height', size.height + 'px')
+
   async function getFileIds() {
     //TODO:: Throw on no key
     const slugRef = ref(database, 'slugs/' + slug)
@@ -51,6 +60,8 @@
     --border: #49CCFF;
     --background: #102A34;
     --text: white;
+    --box-width: 232px;
+    --box-height: 24px;
   }
 
   .root {
@@ -74,9 +85,10 @@
 
   :global(body){
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: flex-start;
     flex-wrap: wrap;
+    padding-right: 16px;
   }
 
 
